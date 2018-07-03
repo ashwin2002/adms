@@ -1,0 +1,1 @@
+settingFileName = 'settings.ini'
