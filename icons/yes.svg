@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="48px"
+   height="48px"
+   id="svg2383"
+   sodipodi:version="0.32"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="yes.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   version="1.1">
+  <title
+     id="title2825">Yes</title>
+  <defs
+     id="defs2385">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 24 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="48 : 24 : 1"
+       inkscape:persp3d-origin="24 : 16 : 1"
+       id="perspective3629" />
+    <linearGradient
+       id="linearGradient3307">
+      <stop
+         style="stop-color:#3ac868;stop-opacity:1;"
+         offset="0"
+         id="stop3309" />
+      <stop
+         style="stop-color:#007e3d;stop-opacity:1;"
+         offset="1"
+         id="stop3311" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3299">
+      <stop
+         style="stop-color:#057f00;stop-opacity:1;"
+         offset="0"
+         id="stop3301" />
+      <stop
+         style="stop-color:#a9fca9;stop-opacity:1;"
+         offset="1"
+         id="stop3303" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3299"
+       id="linearGradient3305"
+       x1="38.106037"
+       y1="32.620831"
+       x2="8.564743"
+       y2="21.711184"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-3.125e-2,-1.9192898)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3307"
+       id="linearGradient3313"
+       x1="6.3872476"
+       y1="19"
+       x2="41.192669"
+       y2="31.408648"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(-3.125e-2,-1.9192898)" />
+    <filter
+       inkscape:collect="always"
+       id="filter3353"
+       x="-0.10285315"
+       width="1.2057063"
+       y="-0.10511366"
+       height="1.2102273">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.868231"
+         id="feGaussianBlur3355" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.4748737"
+     inkscape:cx="-9.0016321"
+     inkscape:cy="-16.063274"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="1680"
+     inkscape:window-height="1000"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2393"
+       visible="true"
+       enabled="true"
+       empspacing="4" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata2388">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Florian Haag</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Florian Haag</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:title>Yes</dc:title>
+        <dc:identifier>http://toolbaricons.sourceforge.net/icons/Modern3D/abstract/yes</dc:identifier>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Florian Haag</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:date>2010-02-02</dc:date>
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/MIT/" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="symbol"
+     inkscape:groupmode="layer">
+    <path
+       id="path3315"
+       d="M 38,3.696256 L 19.09375,31.165006 L 9.59375,24.383756 L 3.3125,33.165006 L 17.3125,43.165006 L 21.78125,46.352506 L 24.90625,41.821256 L 46.90625,9.821256 L 38,3.696256 z"
+       style="fill:#4c4c4c;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter3353)" />
+    <path
+       style="fill:url(#linearGradient3305);fill-opacity:1;fill-rule:evenodd;stroke:url(#linearGradient3313);stroke-width:1;stroke-linecap:butt;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 36.09375,1.3932102 L 17.1875,28.86196 L 7.6875,22.08071 L 1.40625,30.86196 L 15.40625,40.86196 L 19.875,44.04946 L 23,39.51821 L 45,7.5182102 L 36.09375,1.3932102 z"
+       id="path2523" />
+  </g>
+</svg>
