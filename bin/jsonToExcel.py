@@ -113,20 +113,15 @@ class Gstr1 (JsonToExcel):
                             invType = 'Regular'
 
                         if 'itms' in invData:
-                            itemsLen = len(invData['itms'])
-                            if itemsLen != 1:
-                                self.logMsg ('ERROR', "Number of items is '%d' for invoice '%s' dated '%s'" % (itemsLen, invNum, invDate))
-                                continue
-
-                            itemData = invData['itms'][0]
-                            if 'itm_det' in itemData:
-                                invTaxableVal  = itemData['itm_det']['txval']
-                                invTaxRate = itemData['itm_det']['rt']
-                                invCessAmt = ''
-                                b2bDataRow = [ctin, invNum, invDate, invVal, invPos, invRevCharge, invType, invEcomGstin, invTaxRate, invTaxableVal, invCessAmt]
-                                self.appendRowToWorksheet (worksheetObj, b2bDataRow)
-                            else:
-                                self.logMsg ('ERROR', "No item description available for invoice number '%s' dated '%s'" % (invNum, invDate))
+                            for itemData in invData['itms']:
+                                if 'itm_det' in itemData:
+                                    invTaxableVal  = itemData['itm_det']['txval']
+                                    invTaxRate = itemData['itm_det']['rt']
+                                    invCessAmt = ''
+                                    b2bDataRow = [ctin, invNum, invDate, invVal, invPos, invRevCharge, invType, invEcomGstin, invTaxRate, invTaxableVal, invCessAmt]
+                                    self.appendRowToWorksheet (worksheetObj, b2bDataRow)
+                                else:
+                                    self.logMsg ('ERROR', "No item description available for invoice number '%s' dated '%s'" % (invNum, invDate))
                         else:
                             self.logMsg ('ERROR', "No item data present for invoice '%s' for customer '%s'" % (invNum, ctin))
                 else:
