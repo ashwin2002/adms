@@ -94,6 +94,7 @@ class TextToExcel:
                     else:
                         lineLen = len (txtFileLine)
                         xlDataRow = []
+
                         for startIndex in sortedDictKeys:
                             if lineLen < startIndex:
                                 continue
@@ -102,8 +103,8 @@ class TextToExcel:
                             try:
                                 data = float(data)
                             except:
-                                data = (txtFileLine[startIndex:colDataDict[startIndex]]).strip()
-                            xlDataRow.append ((txtFileLine[startIndex:colDataDict[startIndex]]).strip())
+                                pass
+                            xlDataRow.append (data)
 
                         self.appendRowToWorksheet (worksheet, xlDataRow)
 

@@ -96,84 +96,44 @@ def getMonthStr (monthNum, returnStrLen=-1):
     return monthArr[monthNum][0:returnStrLen]
 
 def getStateList ():
-    '''
-        Customer State code data:
-        01	JAMMU & KASHMIR
-        02	HIMACHAL PRADESH
-        03	PUNJAB
-        04	CHANDIGARH
-        05	UTTARAKHAND
-        06	HARYANA
-        07	DELHI
-        08	RAJASTHAN
-        09	UTTAR PRADESH
-        10	BIHAR
-        11	SIKKIM
-        12	ARUNACHAL PRADESH
-        13	NAGALAND
-        14	MANIPUR
-        15	MIZORAM
-        16	TRIPURA
-        17	MEGHALAYA
-        18	ASSAM
-        19	WEST BENGAL
-        20	JHARKHAND
-        21	ORISSA
-        22	CHHATTISGARH
-        23	MADHYA PRADESH
-        24	GUNJARAT
-        25	DAMAN & DIU
-        26	DADRA & NAGAR HAVELI
-        27	MAHARASHTRA
-        28	ANDHRA PRADESH
-        29	KARNATAKA
-        30	GOA
-        31	LAKSHADWEEP
-        32	KERALA
-        33	TAMIL NADU
-        34	PUDUCHERRY
-        35	ANDAMAN & NICOBAR ISLANDS
-        36	TELANGANA
-    '''
-
     stateList = []
-    stateList.append ('Jammu & Kashmir')
-    stateList.append ('Himachal Pradesh')
-    stateList.append ('Punjab')
-    stateList.append ('Chandigarh')
-    stateList.append ('Uttarakhand')
-    stateList.append ('Haryana')
-    stateList.append ('Delhi')
-    stateList.append ('Rajasthan')
-    stateList.append ('Uttar Pradesh')
-    stateList.append ('Bihar')
-    stateList.append ('Sikkim')
-    stateList.append ('Arunachal Pradesh')
-    stateList.append ('Nagaland')
-    stateList.append ('Manipur')
-    stateList.append ('Mizoram')
-    stateList.append ('Tripura')
-    stateList.append ('Meghalaya')
-    stateList.append ('Assam')
-    stateList.append ('West Bengal')
-    stateList.append ('Jharkhand')
-    stateList.append ('Orissa')
-    stateList.append ('Chhattisgarh')
-    stateList.append ('Madhya Pradesh')
-    stateList.append ('Gujarat')
-    stateList.append ('Daman & Diu')
-    stateList.append ('Dadra & Nagar Haveli')
-    stateList.append ('Maharashtra')
-    stateList.append ('Andhra Pradesh')
-    stateList.append ('Karnataka')
-    stateList.append ('Goa')
-    stateList.append ('Lakshadweep')
-    stateList.append ('Kerala')
-    stateList.append ('Tamil Nadu')
-    stateList.append ('Puducherry')
-    stateList.append ('Andaman & Nicobar Islands')
-    stateList.append ('Telangana')
-    stateList.append ('')
+    stateList.append ('Jammu & Kashmir')    # 01
+    stateList.append ('Himachal Pradesh')   # 02
+    stateList.append ('Punjab')             # 03
+    stateList.append ('Chandigarh')         # 04
+    stateList.append ('Uttarakhand')        # 05
+    stateList.append ('Haryana')            # 06
+    stateList.append ('Delhi')              # 07
+    stateList.append ('Rajasthan')          # 08
+    stateList.append ('Uttar Pradesh')      # 09
+    stateList.append ('Bihar')              # 10
+    stateList.append ('Sikkim')             # 11
+    stateList.append ('Arunachal Pradesh')  # 12
+    stateList.append ('Nagaland')           # 13
+    stateList.append ('Manipur')            # 14
+    stateList.append ('Mizoram')            # 15
+    stateList.append ('Tripura')            # 16
+    stateList.append ('Meghalaya')          # 17
+    stateList.append ('Assam')              # 18
+    stateList.append ('West Bengal')        # 19
+    stateList.append ('Jharkhand')          # 20
+    stateList.append ('Orissa')             # 21
+    stateList.append ('Chhattisgarh')       # 22
+    stateList.append ('Madhya Pradesh')     # 23
+    stateList.append ('Gujarat')            # 24
+    stateList.append ('Daman & Diu')        # 25
+    stateList.append ('Dadra & Nagar Haveli')   # 26
+    stateList.append ('Maharashtra')    # 27
+    stateList.append ('Andhra Pradesh') # 28
+    stateList.append ('Karnataka')      # 29
+    stateList.append ('Goa')            # 30
+    stateList.append ('Lakshadweep')    # 31
+    stateList.append ('Kerala')         # 32
+    stateList.append ('Tamil Nadu')     # 33
+    stateList.append ('Puducherry')     # 34
+    stateList.append ('Andaman & Nicobar Islands')  # 35
+    stateList.append ('Telangana')      # 36
+    stateList.append ('Others')         # 37
     stateList.append ('')
     return stateList
 

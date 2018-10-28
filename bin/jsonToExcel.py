@@ -2,6 +2,15 @@ import traceback, os
 import json, openpyxl
 from lib import commonLib
 
+def getValueFromDict(dictObj, fieldName, fieldType):
+    value = ''
+    if fieldType == 'amt' or fieldType == 'rate':
+        value = 0.00
+
+    if fieldName in dictObj:
+        value = dictObj[fieldName]
+    return value
+
 class JsonToExcel:
     def logMsg (self, level, message):
         if level == 'ERROR':
@@ -61,7 +70,8 @@ class Gstr1 (JsonToExcel):
                 self.appendRowToWorksheet (worksheetObj, hsnHeadingDataRow)
 
                 for hsnDataRow in hsnDict['data']:
-                    hsnDataRow = [hsnDataRow['hsn_sc'], hsnDataRow['desc'], hsnDataRow['uqc'], hsnDataRow['samt'], hsnDataRow['camt'], hsnDataRow['qty'],
+                    dataDesc = getValueFromDict(hsnDataRow, 'desc', 'str')
+                    hsnDataRow = [hsnDataRow['hsn_sc'], dataDesc, hsnDataRow['uqc'], hsnDataRow['samt'], hsnDataRow['camt'], hsnDataRow['qty'],
                                   hsnDataRow['val'], hsnDataRow['txval'], hsnDataRow['num'], hsnDataRow['csamt'], hsnDataRow['iamt']]
                     self.appendRowToWorksheet (worksheetObj, hsnDataRow)
             else:
@@ -79,7 +89,15 @@ class Gstr1 (JsonToExcel):
             for b2csRow in jsonObj['b2cs']:
                 posVal = int(b2csRow['pos'])
                 posData = '%02d - %s' % (posVal, stateList[posVal - 1])
-                b2csDataRow = [b2csRow['csamt'], b2csRow['samt'], b2csRow['rt'], posData, b2csRow['txval'], b2csRow['typ'], b2csRow['camt'], b2csRow['sply_ty']]
+
+                csamt = getValueFromDict(b2csRow, 'csamt', 'amt')
+                samt = getValueFromDict(b2csRow, 'samt', 'amt')
+                rt = getValueFromDict(b2csRow, 'rt', 'rate')
+                txVal = getValueFromDict(b2csRow, 'txval', 'rate')
+                typ = getValueFromDict(b2csRow, 'typ', 'str')
+                camt = getValueFromDict(b2csRow, 'camt', 'amt')
+                splyType = getValueFromDict(b2csRow, 'sply_ty', 'str')
+                b2csDataRow = [csamt, samt, rt, posData, txVal, typ, camt, splyType]
                 self.appendRowToWorksheet (worksheetObj, b2csDataRow)
         else:
             self.logMsg ('WARNING', 'Input file does not contain B2CS related data')
