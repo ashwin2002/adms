@@ -1,7 +1,8 @@
 import re
 from lib import window, widgets
 from models import fileUpload
-from bin import jsonToExcel, txtToExcel
+from bin import jsonToExcel, txtToExcel, xlsx_parser
+
 
 ############ Common Class ################
 
@@ -68,6 +69,22 @@ class MenuBarAction:
 
     def hsnCodeLookup (self):
         return
+
+    def excel_parser(self):
+        self.showUtilWindow()
+
+        file_upload_window = fileUpload.FileUploader(self.window)
+        selected_files = file_upload_window.acceptInputFiles('Input xlsx file', 'Xlsx (*.xlsx)', self.window)
+
+        excel_parser = xlsx_parser.ExcelParser(file_upload_window.progressBar, file_upload_window.logViewer)
+        for txtFile in selected_files:
+            excel_parser.convert(txtFile)
+            file_upload_window.totalPercent += file_upload_window.filePercent
+            file_upload_window.progressBar.setValue(file_upload_window.totalPercent)
+
+        file_upload_window.progressBar.setValue(100)
+        file_upload_window.cleanUp()
+        del excel_parser
 
 ############ Common Functions #################
 

@@ -3,7 +3,6 @@ from PyQt5.QtWidgets import QAction, QApplication
 
 from resources import appConfig
 from lib import window, osFunctions, logging, commonLib
-from bin import home
 
 class Application (QApplication):
     def __init__ (self, *args, **kwargs):
@@ -57,11 +56,13 @@ class Application (QApplication):
         gstr1JsonToXlAction = QAction ('GSTR &1', (self.appWindow))
         gstr2JsonToXlAction = QAction ('GSTR &2', (self.appWindow))
         txtToExcelAction    = QAction ('&Text To Excel', (self.appWindow))
+        excel_parser_action = QAction('Parse E&xcel', self.appWindow)
         #hsnCodeLookup = QAction ('&HSN Lookup', (self.appWindow))
 
         jsonToXlMenu.addAction (gstr1JsonToXlAction)
         jsonToXlMenu.addAction (gstr2JsonToXlAction)
         utilsMenu.addAction (txtToExcelAction)
+        utilsMenu.addAction(excel_parser_action)
         #utilsMenu.addAction (hsnCodeLookup)
 
         aboutAction = QAction ('&About', (self.appWindow))
@@ -77,6 +78,7 @@ class Application (QApplication):
         (gstr1JsonToXlAction.triggered).connect (lambda: self.menuActions.jsonToExcel(1))
         (gstr2JsonToXlAction.triggered).connect (lambda: self.menuActions.jsonToExcel(2))
         (txtToExcelAction.triggered).connect (self.menuActions.txtToExcel)
+        excel_parser_action.triggered.connect(self.menuActions.excel_parser)
         #(hsnCodeLookup.triggered).connect (self.menuActions.hsnCodeLookup)
         return
 
