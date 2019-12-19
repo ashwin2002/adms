@@ -95,15 +95,25 @@ class TextToExcel:
                         lineLen = len (txtFileLine)
                         xlDataRow = []
 
-                        for startIndex in sortedDictKeys:
+                        for field_index, startIndex in enumerate(sortedDictKeys):
                             if lineLen < startIndex:
                                 continue
 
                             data = (txtFileLine[startIndex:colDataDict[startIndex]]).strip()
                             try:
-                                data = float(data)
+                                if field_index != 3:
+                                    data = float(data)
+                                else:
+                                    try:
+                                        float(data)
+                                        data = int(data)
+                                    except:
+                                        pass
+                                    finally:
+                                        data = "=CONCATENATE(\"%s\")" % int(data)
                             except:
                                 pass
+
                             xlDataRow.append (data)
 
                         self.appendRowToWorksheet (worksheet, xlDataRow)
