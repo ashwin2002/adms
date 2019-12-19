@@ -71,6 +71,9 @@ class Gstr1 (JsonToExcel):
 
                 for hsnDataRow in hsnDict['data']:
                     dataDesc = getValueFromDict(hsnDataRow, 'desc', 'str')
+                    for field in ['csamt', 'iamt', 'uqc']:
+                        if field not in hsnDataRow:
+                            hsnDataRow[field] = 0
                     hsnDataRow = [hsnDataRow['hsn_sc'], dataDesc, hsnDataRow['uqc'], hsnDataRow['samt'], hsnDataRow['camt'], hsnDataRow['qty'],
                                   hsnDataRow['val'], hsnDataRow['txval'], hsnDataRow['num'], hsnDataRow['csamt'], hsnDataRow['iamt']]
                     self.appendRowToWorksheet (worksheetObj, hsnDataRow)
