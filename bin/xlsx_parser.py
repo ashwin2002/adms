@@ -87,6 +87,11 @@ class ExcelParser:
                     num_blank_rows += 1
                 else:
                     num_blank_rows = 0
+                    for index, _ in enumerate(col_range):
+                        if sheets_to_process[input_sheet_name]['header'][index] == "INVNO":
+                            data_row[index] = "=CONCATENATE(\"%s\")" % data_row[index]
+                            break
+
                     if len(data_row[0]) == 15 \
                             and data_row[inv_num_index].find("-Total") == -1:
                         supp_name = input_sheet['B%s' % row_num].value
