@@ -1,6 +1,12 @@
 import os
+from datetime import datetime
+
 import openpyxl
 import traceback
+from collections import OrderedDict
+
+import constants
+from constants.headers import ExcelHeaders
 
 
 class ExcelParser:
@@ -15,17 +21,23 @@ class ExcelParser:
                 return False
         return True
 
+    @staticmethod
+    def get_excel_header(sheet_name):
+        return getattr(getattr(constants, "headers"), sheet_name)
+
     def logMsg(self, level, message):
         if level == 'ERROR':
             message = message.replace('\n', '<br/>')
-            self.logViewer.append('<font color="red">%s: %s</font>' % (level, message))
+            self.logViewer.append('<font color="red">%s: %s</font>'
+                                  % (level, message))
         elif level == 'WARNING':
             message = message.replace('\n', '<br/>')
-            self.logViewer.append('<font color="#e6ac00">%s: %s</font>' % (level, message))
+            self.logViewer.append('<font color="#e6ac00">%s: %s</font>'
+                                  % (level, message))
         else:
             self.logViewer.append('%s: %s' % (level, message))
 
-    def checkFileExists(self, input_file_name, print_error=True):
+    def check_file_exists(self, input_file_name, print_error=True):
         error_condition = False
         if not(os.path.isfile(input_file_name)):
             if print_error:
@@ -34,127 +46,170 @@ class ExcelParser:
             error_condition = True
         return error_condition
 
-    def appendRowToWorksheet(self, worksheet_obj, data_row):
-        worksheet_obj.append(data_row)
+    def extract_data_from_excel_sheet(self, input_sheet_name, input_sheet,
+                                      row_num, dwnload_val, gst_2yrm_val):
+        def get_month_abbr(month_num):
+            return ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+                    'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month_num]
+        rows_to_append = list()
+        num_of_blank_rows_to_break = 5
+        num_blank_rows = 0
+
+        sheet_header = ExcelHeaders.output_header[input_sheet_name]
+        input_header = ExcelHeaders.input_header[input_sheet_name]
+
+        t_header = self.get_excel_header(input_sheet_name)
+        gstin_index = input_header.index(t_header.GSTIN)
+        inv_num_index = input_header.index(t_header.INV_NO)
+        while True:
+            if num_blank_rows == num_of_blank_rows_to_break:
+                break
+
+            data_row = [None for _ in sheet_header]
+            input_row = list()
+            for index in range(len(sheet_header)):
+                cell_val = input_sheet[chr(ord('A')+index)
+                                       + str(row_num)].value
+                input_row.append(cell_val)
+
+            row_num += 1
+            if ExcelParser.is_row_blank(input_row):
+                num_blank_rows += 1
+                continue
+
+            num_blank_rows = 0
+            gstin_val = input_row[gstin_index]
+            if gstin_val is None or len(gstin_val) != 15 \
+                    or input_row[inv_num_index].find("-Total") != -1:
+                continue
+
+            input_row[inv_num_index] = "=CONCATENATE(\"%s\")" \
+                                       % input_row[inv_num_index]
+            for index, d_type in enumerate(sheet_header):
+                if d_type == t_header.DUPLICATE:
+                    continue
+                try:
+                    d_index = input_header.index(d_type)
+                    data_row[index] = input_row[d_index]
+                except ValueError:
+                    pass
+
+            if t_header.INV_TYPE in sheet_header and data_row[
+                    sheet_header.index(t_header.INV_TYPE)] == "R":
+                data_row[sheet_header.index(t_header.INV_TYPE)] = "Regular"
+
+            if t_header.INV_DATE in sheet_header:
+                cell_val = \
+                    data_row[sheet_header.index(t_header.INV_DATE)].split("-")
+                cell_val.insert(1, get_month_abbr(int(cell_val.pop(1))))
+                data_row[sheet_header.index(t_header.INV_DATE)] = \
+                    "-".join(cell_val)
+
+            if input_sheet_name == "B2B":
+                d_index = sheet_header.index(t_header.ELIGIBLE)
+                data_row.pop(d_index)
+                data_row.insert(d_index, "Inputs")
+                for d_type in [t_header.IGST_AVAILED,
+                               t_header.CGST_AVAILED,
+                               t_header.SGST_AVAILED,
+                               t_header.CESS_AVAILED]:
+                    d_index = sheet_header.index(d_type)
+                    data_row.pop(d_index)
+                    data_row.insert(d_index, 0.00)
+                data_row[sheet_header.index(
+                    t_header.DOWNLOAD)] = dwnload_val
+                data_row[sheet_header.index(
+                    t_header.GST2_YRM)] = gst_2yrm_val
+            rows_to_append.append(data_row)
+        return rows_to_append
+
+    def shuffle_row_for_b2b_headers(self, input_sheet_name, rows_to_process,
+                                    dwnload_val, gst_2yrm_val):
+        def get_var_name(header_dict, value):
+            for tem_header, t_val in header_dict.items():
+                if t_val == value:
+                    return tem_header
+            return None
+
+        index_map = list()
+        rows_to_append = list()
+        b2b_headers_class = constants.headers.B2B
+        output_header = self.get_excel_header(input_sheet_name)
+
+        for b2b_header in ExcelHeaders.output_header["B2B"]:
+            b2b_header_var = get_var_name(b2b_headers_class.get_dict(),
+                                          b2b_header)
+            index = -1
+            for t_index, t_header in enumerate(
+                    ExcelHeaders.output_header[input_sheet_name]):
+                target_header_var = get_var_name(output_header.get_dict(),
+                                                 t_header)
+                if b2b_header_var == target_header_var:
+                    index = t_index
+                    break
+            index_map.append(index)
+
+        for input_row in rows_to_process:
+            row_data = list()
+            for index in index_map:
+                if index == -1:
+                    row_data.append("")
+                    continue
+                row_data.append(input_row[index])
+            row_data[ExcelHeaders.output_header["B2B"].index(
+                b2b_headers_class.DOWNLOAD)] = dwnload_val
+            row_data[ExcelHeaders.output_header["B2B"].index(
+                b2b_headers_class.GST2_YRM)] = gst_2yrm_val
+
+            d_index = ExcelHeaders.output_header["B2B"].index(
+                b2b_headers_class.INV_TYPE)
+            if input_sheet_name == "B2BA":
+                row_data.pop(d_index)
+                row_data.insert(d_index, input_sheet_name)
+            if row_data[d_index].lower() == "credit note":
+                for value_header in [b2b_headers_class.INV_VALUE,
+                                     b2b_headers_class.TAXABLE,
+                                     b2b_headers_class.IGST_PAID,
+                                     b2b_headers_class.CGST_PAID,
+                                     b2b_headers_class.SGST_PAID,
+                                     b2b_headers_class.CESS_PAID]:
+                    header_index = ExcelHeaders.output_header["B2B"].index(
+                        value_header)
+                    value = row_data.pop(header_index)
+                    row_data.insert(header_index, -value)
+            rows_to_append.append(row_data)
+        return rows_to_append
 
     def convert(self, input_file_name):
-        def get_month_index(month_str):
-            return ['', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
-                    'aug', 'sep', 'oct', 'nov', 'dec'].index(month_str)
-
-        def extract_non_b2b_data():
-            row_num = sheets_to_process[input_sheet_name]['start_row']
-            num_blank_rows = 0
-
-            self.appendRowToWorksheet(output_sheet, sheets_to_process[input_sheet_name]['header'])
-            col_range = [chr(i) for i in range(ord('A'), ord(sheets_to_process[input_sheet_name]['end_col'])+1)]
-            inv_num_index = sheets_to_process[input_sheet_name]['header'].index('INV No')
-            while True:
-                data_row = list()
-                for col in col_range:
-                    data_row.append(input_sheet[col + str(row_num)].value)
-
-                if ExcelParser.is_row_blank(data_row):
-                    num_blank_rows += 1
-                else:
-                    num_blank_rows = 0
-                    if len(data_row[0]) == 15 \
-                            and data_row[inv_num_index].find("-Total") == -1:
-                        self.appendRowToWorksheet(output_sheet, data_row)
-
-                if num_blank_rows == num_of_blank_rows_to_break:
-                    break
-                row_num += 1
-
-        def extract_b2b_data():
-            row_num = sheets_to_process[input_sheet_name]['start_row']
-            num_blank_rows = 0
-
-            self.appendRowToWorksheet(output_sheet, sheets_to_process[input_sheet_name]['header'])
-            col_range = ['A', 'C', 'E', 'F', 'G', 'H', 'D', 'I', 'J', 'K', 'L', 'M', 'N']
-
-            inv_num_index = sheets_to_process[input_sheet_name]['header'].index('INVNO')
-            while True:
-                data_row = list()
-                for index, col in enumerate(col_range):
-                    cell_val = input_sheet[col + str(row_num)].value
-                    if sheets_to_process[input_sheet_name]['header'][index] == "INVTYPE" \
-                            and cell_val == 'R':
-                        cell_val = "Regular"
-                    data_row.append(cell_val)
-
-                if ExcelParser.is_row_blank(data_row):
-                    num_blank_rows += 1
-                else:
-                    num_blank_rows = 0
-                    for index, _ in enumerate(col_range):
-                        if sheets_to_process[input_sheet_name]['header'][index] == "INVNO":
-                            data_row[index] = "=CONCATENATE(\"%s\")" % data_row[index]
-                            break
-
-                    if len(data_row[0]) == 15 \
-                            and data_row[inv_num_index].find("-Total") == -1:
-                        supp_name = input_sheet['B%s' % row_num].value
-                        is_submitted = input_sheet['O%s' % row_num].value
-                        data_row.extend(['Inputs', 0.00, 0.00, 0.00, 0.00,
-                                         dwnload_val, gst_2yrm_val,
-                                         supp_name, is_submitted])
-                        self.appendRowToWorksheet(output_sheet, data_row)
-
-                if num_blank_rows == num_of_blank_rows_to_break:
-                    break
-                row_num += 1
-
-        sheets_to_process = dict()
+        sheets_to_process = OrderedDict()
         sheets_to_process['B2B'] = dict()
         sheets_to_process['B2BA'] = dict()
         sheets_to_process['CDNR'] = dict()
-        sheets_to_process['CDNRA'] = dict()
+        # sheets_to_process['CDNRA'] = dict()
 
-        sheets_to_process['B2B']['header'] = ['GSTIN', 'INVNO', 'INVDATE', 'INVVALUE', 'PLACE',
-                                              'RCM', 'INVTYPE', 'RATE', 'TAXABLE', 'IGSTPAID',
-                                              'CGSTPAID', 'SGSTPAID', 'CESSPAID', 'ELIGIBLE',
-                                              'IGSTAVAILD', 'CGSTAVAILD', 'SIGSTAVAIL',
-                                              'CESSAVAILD', 'DWNLOAD', 'GST2YRM', 'SUPPNAME',
-                                              'SUBMITTED']
-
-        sheets_to_process['B2BA']['header'] = ['GSTIN', 'SUPPNAME', 'INV No', 'INV Date',
-                                               '', '', 'INV Value', 'Place', 'RCM',
-                                               'INV Type', 'Rate', 'Taxable', 'IGST', 'CGST',
-                                               'SGST', 'CESS', 'IGST availed', 'CGST availed',
-                                               'SGST availed', 'CESS availed', 'Download date',
-                                               'GST2YRM', 'Submitted']
-        sheets_to_process['CDNR']['header'] = ['GSTIN', 'SUPP Name', 'Note Type', 'INV No',
-                                               'INV date', 'INV Value', 'Reason', 'Rate',
-                                               'Taxable', 'IGST Paid', 'CGST Paid', 'SGST Paid',
-                                               'CESS Paid', 'Submitted']
-        sheets_to_process['CDNRA']['header'] = ['GSTIN', 'SUPP Name', 'Note Type', 'INV No',
-                                                'INV date', '', '', '', 'INV Value', 'Place',
-                                                '', 'Rate',
-                                                'Taxable', 'IGST Paid', 'CGST Paid', 'SGST Paid',
-                                                'Submitted']
         sheets_to_process['B2B']['start_row'] = 7
         sheets_to_process['B2BA']['start_row'] = 8
-        sheets_to_process['CDNR']['start_row'] = 11
-        sheets_to_process['CDNRA']['start_row'] = 10
-        sheets_to_process['B2B']['end_col'] = 'V'
-        sheets_to_process['B2BA']['end_col'] = 'W'
-        sheets_to_process['CDNR']['end_col'] = 'T'
-        sheets_to_process['CDNRA']['end_col'] = 'Q'
-        num_of_blank_rows_to_break = 5
+        sheets_to_process['CDNR']['start_row'] = 7
+        # sheets_to_process['CDNRA']['start_row'] = 8
 
         self.logMsg('INFO', "Processing file '%s'" % input_file_name)
         output_file_name = input_file_name.split('/')
         file_name = (output_file_name.pop()).split('.')[0]
         output_file_name = '/'.join(output_file_name)
         output_file_name += '/%s_parsed.xlsx' % file_name
-        file_not_exists = self.checkFileExists(output_file_name, print_error=False)
+        file_not_exists = self.check_file_exists(output_file_name,
+                                                 print_error=False)
 
-        file_name_data = input_file_name.split("/")[-1].split('.')[0].split('_')
+        file_name_data = \
+            input_file_name \
+            .split("/")[-1] \
+            .split('.')[0] \
+            .split('_')
         gst_2yrm_val = file_name_data[1][2:] + file_name_data[1][0:2]
-        dwnload_val = str(file_name_data[3][0:2]) + '-' \
-                      + str(get_month_index(file_name_data[3][2:5].lower())) + '-' \
-                      + str(file_name_data[3][5:])
+        dwnload_val = \
+            str(file_name_data[3][0:2]) + '-' \
+            + str(file_name_data[3][2:5]) + '-' \
+            + str(file_name_data[3][5:])
 
         try:
             # Load input / output workbooks
@@ -167,23 +222,49 @@ class ExcelParser:
 
             output_workbook_sheets = output_workbook.get_sheet_names()
 
-            for input_sheet_name in input_workbook.get_sheet_names():
-                if input_sheet_name in sheets_to_process.keys():
-                    self.logMsg('INFO', 'Processing sheet %s' % input_sheet_name)
-                    if input_sheet_name in output_workbook_sheets:
-                        self.logMsg('WARNING', 'Sheet %s already exists !! Will recreate..'
-                                               % input_sheet_name)
-                        output_workbook.remove(output_workbook.get_sheet_by_name(input_sheet_name))
-                    input_sheet = input_workbook.get_sheet_by_name(input_sheet_name)
-                    output_sheet = output_workbook.create_sheet(input_sheet_name)
-                    if input_sheet_name == "B2B":
-                        extract_b2b_data()
-                    else:
-                        extract_non_b2b_data()
+            for input_sheet_name in sheets_to_process.keys():
+                if input_sheet_name not in input_workbook.get_sheet_names():
+                    continue
+
+                self.logMsg('INFO', 'Processing sheet %s' % input_sheet_name)
+                if input_sheet_name in output_workbook_sheets:
+                    self.logMsg('WARNING',
+                                'Sheet %s already exists !! Will recreate..'
+                                % input_sheet_name)
+                    output_workbook.remove(
+                        output_workbook.get_sheet_by_name(input_sheet_name))
+                input_sheet = input_workbook.get_sheet_by_name(
+                    input_sheet_name)
+
+                # Start of data extraction logic
+                rows_to_append = self.extract_data_from_excel_sheet(
+                    input_sheet_name, input_sheet,
+                    sheets_to_process[input_sheet_name]['start_row'],
+                    dwnload_val, gst_2yrm_val)
+
+                # Create and append data to output sheet
+                output_sheet = output_workbook.create_sheet(input_sheet_name)
+                output_sheet.append(
+                    ExcelHeaders.output_header[input_sheet_name])
+                for row in rows_to_append:
+                    output_sheet.append(row)
+
+                # Logic to append data to B2B sheet
+                if input_sheet_name != "B2B":
+                    rows_to_append = self.shuffle_row_for_b2b_headers(
+                        input_sheet_name,
+                        rows_to_append,
+                        dwnload_val,
+                        gst_2yrm_val)
+                    output_sheet = output_workbook["B2B"]
+
+                    for row in rows_to_append:
+                        output_sheet.append(row)
 
             output_workbook.save(output_file_name)
-        except Exception as e:
-            self.logMsg('ERROR', 'Exception during file parsing -> %s' % (traceback.format_exc()))
+        except Exception:
+            self.logMsg('ERROR', 'Exception during file parsing -> %s'
+                                 % (traceback.format_exc()))
 
         self.logMsg('INFO', "Output saved in file '%s'" % output_file_name)
         self.logMsg('::::::::::', 'Done ::::::::::')
