@@ -1,8 +1,12 @@
-import os, sys, configparser
+import configparser
+import os
+import sys
 from PyQt5.QtWidgets import QAction, QApplication
 
+from bin.menu_action_triggers import MenuBarAction
 from resources import appConfig
-from lib import window, osFunctions, logging, commonLib
+from lib import window, osFunctions, logging
+
 
 class Application (QApplication):
     def __init__ (self, *args, **kwargs):
@@ -75,27 +79,24 @@ class Application (QApplication):
         fileMenu.addAction (menuExitAction)
 
         ### Register Event handlers for menu items ###
-        (aboutAction.triggered).connect (self.menuActions.showAbout)
-        (menuExitAction.triggered).connect (self.quit)
-        (gstr1JsonToXlAction.triggered).connect (lambda: self.menuActions.jsonToExcel(1))
-        (gstr2JsonToXlAction.triggered).connect (lambda: self.menuActions.jsonToExcel(2))
-        (txtToExcelAction.triggered).connect (self.menuActions.txtToExcel)
+        aboutAction.triggered.connect(self.menuActions.show_about)
+        menuExitAction.triggered.connect(self.quit)
+        gstr1JsonToXlAction.triggered.connect(lambda: self.menuActions.json_to_excel(1))
+        gstr2JsonToXlAction.triggered.connect(lambda: self.menuActions.json_to_excel(2))
+        txtToExcelAction.triggered.connect(self.menuActions.txt_to_excel)
         excel_parser_action.triggered.connect(self.menuActions.excel_parser)
         send_mail_from_excel.triggered.connect(
             self.menuActions.send_mail_for_gstr_itc_data)
-
-        #(hsnCodeLookup.triggered).connect (self.menuActions.hsnCodeLookup)
-        return
+        #(hsnCodeLookup.triggered).connect (self.menuActions.hsn_code_lookup)
 
     def loadBasicUI (self):
         self.appWindow   = window.MainWindow ('ADMS', icon='icons/icon.png', maximize=True)
         self.mainWindow  = window.Window (parent=self.appWindow)
         self.utilWindow  = window.Window (parent=self.appWindow)
-        self.menuActions = commonLib.MenuBarAction (self.appWindow, self.utilWindow, self.logger)
+        self.menuActions = MenuBarAction (self.appWindow, self.utilWindow, self.logger)
         (self.appWindow).setCentralWidget (self.mainWindow)
         self.createMenuBar ()
         sys.exit(self.exec())
-        return
 
     def verifyFiles (self):
         if not(os.path.isfile (appConfig.settingFileName)):
@@ -103,7 +104,6 @@ class Application (QApplication):
                 pass
             #window.Popup ('critical', 'File Missing!', 'File \'%s\' missing' % (appConfig.settingFileName))
             #sys.exit (1)
-        return
 
     def run (self):
         self.settings = configparser.ConfigParser ()
@@ -112,11 +112,11 @@ class Application (QApplication):
         osFunctions.createDir ([(self.settings)['log']['path'], (self.settings)['data']['path']])
 
         self.logger = logging.Logger ((self.settings)['log']['path'], 'debug.log')
-        (self.logger).openLogFile ()
-        self.loadBasicUI ()
-        return
+        self.logger.openLogFile()
+        self.loadBasicUI()
+
 
 if __name__ == '__main__':
     applicationObj = Application(sys.argv)
-    applicationObj.verifyFiles ()
-    applicationObj.run ()
+    applicationObj.verifyFiles()
+    applicationObj.run()
