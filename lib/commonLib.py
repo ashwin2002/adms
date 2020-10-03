@@ -1,7 +1,6 @@
-import os
 import re
 from models import fileUpload
-from bin import jsonToExcel, txtToExcel, xlsx_parser
+from bin import jsonToExcel, txtToExcel, xlsx_parser, mail_from_excel
 
 
 ############ Common Class ################
@@ -92,15 +91,16 @@ class MenuBarAction:
         file_upload_window = fileUpload.FileUploader(self.window)
         selected_files = file_upload_window.acceptInputFiles('Input xlsx file', 'Xlsx (*.xlsx)', self.window)
 
-        excel_parser = xlsx_parser.ExcelParser(file_upload_window.progressBar, file_upload_window.logViewer)
+        excel_parser = mail_from_excel.MailFromExcel(
+            file_upload_window.progressBar,
+            file_upload_window.logViewer)
         for txtFile in selected_files:
-            excel_parser.convert(txtFile)
+            excel_parser.process(txtFile)
             file_upload_window.totalPercent += file_upload_window.filePercent
             file_upload_window.progressBar.setValue(file_upload_window.totalPercent)
 
         file_upload_window.progressBar.setValue(100)
         file_upload_window.cleanUp()
-        del excel_parser
 
 ############ Common Functions #################
 
@@ -177,19 +177,3 @@ def getStateCode (stateName):
     if stateName in stateList:
         stateCode = '%02d' % (stateList.index (stateName) + 1)
     return stateCode
-
-
-def is_row_blank(d_row):
-    for data in d_row:
-        if data is not None:
-            return False
-    return True
-
-
-def is_file_exists(input_file_name, logger=None):
-    file_exists = True
-    if not(os.path.isfile(input_file_name)):
-        file_exists = False
-        if logger:
-            logger.error("File '%s' does not exists !" % input_file_name)
-    return file_exists

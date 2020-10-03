@@ -57,10 +57,12 @@ class Application (QApplication):
         gstr2JsonToXlAction = QAction ('GSTR &2', (self.appWindow))
         txtToExcelAction    = QAction ('&Text To Excel', (self.appWindow))
         excel_parser_action = QAction('Parse E&xcel', self.appWindow)
+        send_mail_from_excel = QAction('&Send mail', self.appWindow)
         #hsnCodeLookup = QAction ('&HSN Lookup', (self.appWindow))
 
         jsonToXlMenu.addAction (gstr1JsonToXlAction)
         jsonToXlMenu.addAction (gstr2JsonToXlAction)
+        utilsMenu.addAction (send_mail_from_excel)
         utilsMenu.addAction (txtToExcelAction)
         utilsMenu.addAction(excel_parser_action)
         #utilsMenu.addAction (hsnCodeLookup)
@@ -79,6 +81,9 @@ class Application (QApplication):
         (gstr2JsonToXlAction.triggered).connect (lambda: self.menuActions.jsonToExcel(2))
         (txtToExcelAction.triggered).connect (self.menuActions.txtToExcel)
         excel_parser_action.triggered.connect(self.menuActions.excel_parser)
+        send_mail_from_excel.triggered.connect(
+            self.menuActions.send_mail_for_gstr_itc_data)
+
         #(hsnCodeLookup.triggered).connect (self.menuActions.hsnCodeLookup)
         return
 
