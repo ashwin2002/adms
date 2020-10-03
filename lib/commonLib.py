@@ -1,76 +1,75 @@
+import json
 import re
 
 
-def verifyGstinNo (gstin):
-    gstin = re.search ('[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9][0-9A-Z]{2}', gstin)
+def verifyGstinNo(gstin):
+    gstin = re.search('[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9][0-9A-Z]{2}', gstin)
     if gstin:
         gstin = gstin.group(0)
     return gstin
 
-def getMonthStr (monthNum, returnStrLen=-1):
-    monthArr = []
-    monthArr.append ('Invalid')
-    monthArr.append ('January')
-    monthArr.append ('Febuary')
-    monthArr.append ('March')
-    monthArr.append ('April')
-    monthArr.append ('May')
-    monthArr.append ('June')
-    monthArr.append ('July')
-    monthArr.append ('August')
-    monthArr.append ('September')
-    monthArr.append ('October')
-    monthArr.append ('November')
-    monthArr.append ('December')
 
-    return monthArr[monthNum][0:returnStrLen]
+def getMonthStr(month_num, returnStrLen=-1):
+    month_arr = ['Invalid',
+                 'January', 'Febuary', 'March', 'April',
+                 'May', 'June', 'July', 'August',
+                 'September', 'October', 'November', 'December']
+    return month_arr[month_num][0:returnStrLen]
 
-def getStateList ():
-    stateList = []
-    stateList.append ('Jammu & Kashmir')    # 01
-    stateList.append ('Himachal Pradesh')   # 02
-    stateList.append ('Punjab')             # 03
-    stateList.append ('Chandigarh')         # 04
-    stateList.append ('Uttarakhand')        # 05
-    stateList.append ('Haryana')            # 06
-    stateList.append ('Delhi')              # 07
-    stateList.append ('Rajasthan')          # 08
-    stateList.append ('Uttar Pradesh')      # 09
-    stateList.append ('Bihar')              # 10
-    stateList.append ('Sikkim')             # 11
-    stateList.append ('Arunachal Pradesh')  # 12
-    stateList.append ('Nagaland')           # 13
-    stateList.append ('Manipur')            # 14
-    stateList.append ('Mizoram')            # 15
-    stateList.append ('Tripura')            # 16
-    stateList.append ('Meghalaya')          # 17
-    stateList.append ('Assam')              # 18
-    stateList.append ('West Bengal')        # 19
-    stateList.append ('Jharkhand')          # 20
-    stateList.append ('Orissa')             # 21
-    stateList.append ('Chhattisgarh')       # 22
-    stateList.append ('Madhya Pradesh')     # 23
-    stateList.append ('Gujarat')            # 24
-    stateList.append ('Daman & Diu')        # 25
-    stateList.append ('Dadra & Nagar Haveli')   # 26
-    stateList.append ('Maharashtra')    # 27
-    stateList.append ('Andhra Pradesh') # 28
-    stateList.append ('Karnataka')      # 29
-    stateList.append ('Goa')            # 30
-    stateList.append ('Lakshadweep')    # 31
-    stateList.append ('Kerala')         # 32
-    stateList.append ('Tamil Nadu')     # 33
-    stateList.append ('Puducherry')     # 34
-    stateList.append ('Andaman & Nicobar Islands')  # 35
-    stateList.append ('Telangana')      # 36
-    stateList.append ('Others')         # 37
-    stateList.append ('')
-    return stateList
 
-def getStateCode (stateName):
-    stateCode = '-1'
-    stateName = stateName.strip()
-    stateList = getStateList ()
-    if stateName in stateList:
-        stateCode = '%02d' % (stateList.index (stateName) + 1)
-    return stateCode
+def getStateList():
+    state_list = list()
+    state_list.append('Jammu & Kashmir')    # 01
+    state_list.append('Himachal Pradesh')   # 02
+    state_list.append('Punjab')             # 03
+    state_list.append('Chandigarh')         # 04
+    state_list.append('Uttarakhand')        # 05
+    state_list.append('Haryana')            # 06
+    state_list.append('Delhi')              # 07
+    state_list.append('Rajasthan')          # 08
+    state_list.append('Uttar Pradesh')      # 09
+    state_list.append('Bihar')              # 10
+    state_list.append('Sikkim')             # 11
+    state_list.append('Arunachal Pradesh')  # 12
+    state_list.append('Nagaland')           # 13
+    state_list.append('Manipur')            # 14
+    state_list.append('Mizoram')            # 15
+    state_list.append('Tripura')            # 16
+    state_list.append('Meghalaya')          # 17
+    state_list.append('Assam')              # 18
+    state_list.append('West Bengal')        # 19
+    state_list.append('Jharkhand')          # 20
+    state_list.append('Orissa')             # 21
+    state_list.append('Chhattisgarh')       # 22
+    state_list.append('Madhya Pradesh')     # 23
+    state_list.append('Gujarat')            # 24
+    state_list.append ('Daman & Diu')        # 25
+    state_list.append('Dadra & Nagar Haveli')   # 26
+    state_list.append('Maharashtra')    # 27
+    state_list.append('Andhra Pradesh') # 28
+    state_list.append('Karnataka')      # 29
+    state_list.append('Goa')            # 30
+    state_list.append('Lakshadweep')    # 31
+    state_list.append('Kerala')         # 32
+    state_list.append('Tamil Nadu')     # 33
+    state_list.append('Puducherry')     # 34
+    state_list.append('Andaman & Nicobar Islands')  # 35
+    state_list.append('Telangana')      # 36
+    state_list.append('Others')         # 37
+    state_list.append('')
+    return state_list
+
+
+def getStateCode(state_name):
+    state_code = '-1'
+    state_name = state_name.strip()
+    state_list = getStateList()
+    if state_name in state_list:
+        state_code = '%02d' % (state_list.index(state_name) + 1)
+    return state_code
+
+
+def loadJsonData(json_file_name):
+    with open(json_file_name, 'r') as filePtr:
+        json_obj = json.loads(filePtr.read())
+    return json_obj

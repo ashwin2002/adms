@@ -1,6 +1,4 @@
 import os
-from datetime import datetime
-
 import openpyxl
 import traceback
 from collections import OrderedDict

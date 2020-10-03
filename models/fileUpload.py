@@ -1,38 +1,35 @@
 from lib import window, widgets
 
-class FileUploader (object):
-    def __init__ (self, windowObj):
+
+class FileUploader(object):
+    def __init__(self, window_obj):
         self.progressBar = None
-        self.logViewer   = None
+        self.logViewer = None
         self.filePercent = 100
         self.totalPercent = 0
         self.fileSelectDialog = None
-        self.__createWidgets (windowObj)
-        return
+        self.__createWidgets(window_obj)
 
-    def __createWidgets (self, windowObj):
-        vboxObj = widgets.VBox (parent=windowObj)
-        self.progressBar = widgets.ProgressBar (parent=windowObj)
-        self.logViewer   = widgets.TextEdit (parent=windowObj)
+    def __createWidgets(self, window_obj):
+        vbox_obj = widgets.VBox(parent=window_obj)
+        self.progressBar = widgets.ProgressBar(parent=window_obj)
+        self.logViewer = widgets.TextEdit(parent=window_obj)
 
-        vboxObj.addWidget (self.progressBar)
-        vboxObj.addWidget (self.logViewer)
+        vbox_obj.addWidget(self.progressBar)
+        vbox_obj.addWidget(self.logViewer)
 
-        windowObj.setLayout (vboxObj)
-        return
+        window_obj.setLayout(vbox_obj)
 
-    def acceptInputFiles (self, winTitle, fileFilters, windowObj):
-        self.fileSelectDialog = window.FileDialog (title=winTitle, filter=fileFilters, parent=windowObj)
-        selectedFiles = (self.fileSelectDialog).getSelectedFiles ()
+    def acceptInputFiles(self, win_title, file_filters, window_obj):
+        self.fileSelectDialog = window.FileDialog(title=win_title,
+                                                  filter=file_filters,
+                                                  parent=window_obj)
+        selected_files = self.fileSelectDialog.getSelectedFiles()
 
-        filePercent  = 100
-        totalPercent = 0
+        self.progressBar.setRange(0, 100)
+        self.progressBar.setValue(0)
+        return selected_files
 
-        (self.progressBar).setRange (0,100)
-        (self.progressBar).setValue (0)
-        return selectedFiles
-
-    def cleanUp (self):
+    def cleanUp(self):
         if self.fileSelectDialog:
             del self.fileSelectDialog
-        return
