@@ -2,7 +2,8 @@
 
 block_cipher = None
 
-copyFiles = [('icons', 'icons'), ('settings.ini', '.')]
+copyFiles = [('icons', 'icons'), ('settings.ini', '.'),
+             ('data', 'data')]
 
 a = Analysis(['main.py'],
              pathex=['F:\\works\\python\\Adms'],
