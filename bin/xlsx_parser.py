@@ -1,11 +1,9 @@
-import os
 import openpyxl
 import traceback
-from collections import OrderedDict
 
 import constants
-from constants.headers import ExcelHeaders
-from lib.excel_lib import is_row_blank, is_file_exists
+from lib.excel_lib import is_row_blank, is_file_exists, get_target_excel_class, \
+    get_next_col
 from lib.logging import UiLogger
 
 
@@ -27,22 +25,27 @@ class ExcelParser:
         num_of_blank_rows_to_break = 5
         num_blank_rows = 0
 
-        sheet_header = ExcelHeaders.output_header[input_sheet_name]
-        input_header = ExcelHeaders.input_header[input_sheet_name]
+        xl_class = get_target_excel_class(gst_2yrm_val)
+        sheet_header = xl_class.output_header[input_sheet_name]
+        input_header = xl_class.input_header[input_sheet_name]
 
         t_header = self.get_excel_header(input_sheet_name)
-        gstin_index = input_header.index(t_header.GSTIN)
-        inv_num_index = input_header.index(t_header.INV_NO)
+        gstin_index = inv_num_index = -1
+        if t_header.GSTIN in input_header:
+            gstin_index = input_header.index(t_header.GSTIN)
+        if t_header.INV_NO in input_header:
+            inv_num_index = input_header.index(t_header.INV_NO)
         while True:
             if num_blank_rows == num_of_blank_rows_to_break:
                 break
 
             data_row = [None for _ in sheet_header]
             input_row = list()
+            curr_col = "A"
             for index in range(len(sheet_header)):
-                cell_val = input_sheet[chr(ord('A')+index)
-                                       + str(row_num)].value
+                cell_val = input_sheet[curr_col + str(row_num)].value
                 input_row.append(cell_val)
+                curr_col = get_next_col(curr_col)
 
             row_num += 1
             if is_row_blank(input_row):
@@ -50,19 +53,24 @@ class ExcelParser:
                 continue
 
             num_blank_rows = 0
-            gstin_val = input_row[gstin_index]
-            if gstin_val is None or len(gstin_val) != 15 \
-                    or input_row[inv_num_index].find("-Total") != -1:
-                continue
+            if gstin_index != -1:
+                gstin_val = input_row[gstin_index]
+                if gstin_val is None or len(gstin_val) != 15 \
+                        or str(input_row[inv_num_index]).find("-Total") != -1:
+                    continue
 
-            input_row[inv_num_index] = "=CONCATENATE(\"%s\")" \
-                                       % input_row[inv_num_index]
+            if inv_num_index != -1:
+                input_row[inv_num_index] = "=CONCATENATE(\"%s\")" \
+                                           % input_row[inv_num_index]
             for index, d_type in enumerate(sheet_header):
                 if d_type == t_header.DUMMY:
                     continue
                 try:
                     d_index = input_header.index(d_type)
-                    data_row[index] = input_row[d_index]
+                    val = input_row[d_index]
+                    if d_type == t_header.SUBMITTED:
+                        val = "SUBMITTED" if val == "Y" else "NOT_SUBMITTED"
+                    data_row[index] = val
                 except ValueError:
                     pass
 
@@ -97,9 +105,9 @@ class ExcelParser:
 
     def shuffle_row_for_b2b_headers(self, input_sheet_name, rows_to_process,
                                     dwnload_val, gst_2yrm_val):
-        def get_var_name(header_dict, value):
+        def get_var_name(header_dict, val):
             for tem_header, t_val in header_dict.items():
-                if t_val == value:
+                if t_val == val:
                     return tem_header
             return None
 
@@ -108,12 +116,13 @@ class ExcelParser:
         b2b_headers_class = constants.headers.B2B
         output_header = self.get_excel_header(input_sheet_name)
 
-        for b2b_header in ExcelHeaders.output_header["B2B"]:
+        xl_class = get_target_excel_class(gst_2yrm_val)
+        for b2b_header in xl_class.output_header["B2B"]:
             b2b_header_var = get_var_name(b2b_headers_class.get_dict(),
                                           b2b_header)
             index = -1
             for t_index, t_header in enumerate(
-                    ExcelHeaders.output_header[input_sheet_name]):
+                    xl_class.output_header[input_sheet_name]):
                 target_header_var = get_var_name(output_header.get_dict(),
                                                  t_header)
                 if b2b_header_var == target_header_var:
@@ -128,12 +137,12 @@ class ExcelParser:
                     row_data.append("")
                     continue
                 row_data.append(input_row[index])
-            row_data[ExcelHeaders.output_header["B2B"].index(
+            row_data[xl_class.output_header["B2B"].index(
                 b2b_headers_class.DOWNLOAD)] = dwnload_val
-            row_data[ExcelHeaders.output_header["B2B"].index(
+            row_data[xl_class.output_header["B2B"].index(
                 b2b_headers_class.GST2_YRM)] = gst_2yrm_val
 
-            d_index = ExcelHeaders.output_header["B2B"].index(
+            d_index = xl_class.output_header["B2B"].index(
                 b2b_headers_class.INV_TYPE)
             if input_sheet_name == "B2BA":
                 row_data.pop(d_index)
@@ -145,7 +154,7 @@ class ExcelParser:
                                      b2b_headers_class.CGST_PAID,
                                      b2b_headers_class.SGST_PAID,
                                      b2b_headers_class.CESS_PAID]:
-                    header_index = ExcelHeaders.output_header["B2B"].index(
+                    header_index = xl_class.output_header["B2B"].index(
                         value_header)
                     value = row_data.pop(header_index)
                     row_data.insert(header_index, -value)
@@ -153,17 +162,6 @@ class ExcelParser:
         return rows_to_append
 
     def convert(self, input_file_name):
-        sheets_to_process = OrderedDict()
-        sheets_to_process['B2B'] = dict()
-        sheets_to_process['B2BA'] = dict()
-        sheets_to_process['CDNR'] = dict()
-        # sheets_to_process['CDNRA'] = dict()
-
-        sheets_to_process['B2B']['start_row'] = 7
-        sheets_to_process['B2BA']['start_row'] = 8
-        sheets_to_process['CDNR']['start_row'] = 7
-        # sheets_to_process['CDNRA']['start_row'] = 8
-
         self.log.info("Processing file '%s'" % input_file_name)
         output_file_name = input_file_name.split('/')
         file_name = (output_file_name.pop()).split('.')[0]
@@ -181,6 +179,7 @@ class ExcelParser:
             + str(file_name_data[3][2:5]) + '-' \
             + str(file_name_data[3][5:])
 
+        xl_class = get_target_excel_class(gst_2yrm_val)
         try:
             # Load input / output workbooks
             input_workbook = openpyxl.load_workbook(input_file_name)
@@ -192,7 +191,7 @@ class ExcelParser:
 
             output_workbook_sheets = output_workbook.get_sheet_names()
 
-            for input_sheet_name in sheets_to_process.keys():
+            for input_sheet_name in xl_class.input_header.keys():
                 if input_sheet_name not in input_workbook.get_sheet_names():
                     continue
 
@@ -208,13 +207,13 @@ class ExcelParser:
                 # Start of data extraction logic
                 rows_to_append = self.extract_data_from_excel_sheet(
                     input_sheet_name, input_sheet,
-                    sheets_to_process[input_sheet_name]['start_row'],
+                    xl_class.start_row[input_sheet_name],
                     dwnload_val, gst_2yrm_val)
 
                 # Create and append data to output sheet
                 output_sheet = output_workbook.create_sheet(input_sheet_name)
                 output_sheet.append(
-                    ExcelHeaders.output_header[input_sheet_name])
+                    xl_class.output_header[input_sheet_name])
                 for row in rows_to_append:
                     output_sheet.append(row)
 
