@@ -45,13 +45,13 @@ class MailFromExcel:
         self.log.info("Processing file %s" % input_file_name)
         input_workbook = openpyxl.load_workbook(input_file_name)
         file_name = input_file_name.split('\\')[-1].split('.')[0].split('_')
-        company_initial = file_name[0]
-        company_file_data = "%s %s - " % (company_initial, file_name[1])
+        comp_initial = file_name[0]
+        company_file_data = "%s %s - " % (comp_initial, file_name[1])
 
-        if company_initial not in company.info \
-                or company.info[company_initial]["mail"] == "":
+        if comp_initial not in company.info \
+                or company.info[comp_initial]["mail"] == "":
             self.log.error("Exiting: Mail id not defined for '%s'"
-                           % company_initial)
+                           % comp_initial)
             return
 
         for input_sheet_name in input_workbook.get_sheet_names():
@@ -133,7 +133,9 @@ class MailFromExcel:
                     smtp_session.login(Smtp.user_name, Smtp.password)
                     self.log.info("Login successful")
 
-                comp_name = company.info[company_initial]["name"]
+                comp_name = \
+                    company.info[comp_initial]["name"] \
+                    + " GST # %s" % company.info[comp_initial]["gst"]
                 curr_html_header = \
                     mail_info["html_header"] % (m_data["heading"] % comp_name,
                                                 m_data["message"])
@@ -149,7 +151,7 @@ class MailFromExcel:
                     self.log.info("Sending mail for %s..." % supp_name)
                     msg = MIMEMultipart('alternative')
                     msg['From'] = Smtp.user_name
-                    msg['To'] = company.info[company_initial]["mail"]
+                    msg['To'] = company.info[comp_initial]["mail"]
                     msg['Subject'] = "%s %s::%s - %s" \
                                      % (company_file_data,
                                         supp_name,
@@ -179,7 +181,7 @@ class MailFromExcel:
                     # msg.attach(data_to_attach)
                     smtp_session.sendmail(
                         Smtp.user_name,
-                        company.info[company_initial]["mail"],
+                        company.info[comp_initial]["mail"],
                         msg.as_string())
                     mail_count += 1
 
