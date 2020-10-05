@@ -53,20 +53,24 @@ class Application (QApplication):
         help_menu = menu_bar.addMenu('&Help')
 
         json_to_xl_menu = utils_menu.addMenu('&Json To Excel')
+        parse_excel_menu = utils_menu.addMenu('Parse E&xcel')
 
         # Create Add option to Menu bar items
         gstr1_json_to_xl_action = QAction('GSTR &1', self.appWindow)
         gstr2_json_to_xl_action = QAction('GSTR &2', self.appWindow)
         txt_to_excel_action = QAction('&Text To Excel', self.appWindow)
-        excel_parser_action = QAction('Parse E&xcel', self.appWindow)
-        send_mail_from_excel = QAction('&Send mail', self.appWindow)
+        extract_data_action = QAction('E&xtract data', self.appWindow)
+        extract_gstr2b_action = QAction('Extract &Gstr-2B data',
+                                        self.appWindow)
+        send_mail_action = QAction('Send &mail', self.appWindow)
         # hsnCodeLookup = QAction ('&HSN Lookup', (self.appWindow))
 
         json_to_xl_menu.addAction(gstr1_json_to_xl_action)
         json_to_xl_menu.addAction(gstr2_json_to_xl_action)
-        utils_menu.addAction(send_mail_from_excel)
+        parse_excel_menu.addAction(extract_data_action)
+        parse_excel_menu.addAction(extract_gstr2b_action)
+        parse_excel_menu.addAction(send_mail_action)
         utils_menu.addAction(txt_to_excel_action)
-        utils_menu.addAction(excel_parser_action)
         # utilsMenu.addAction (hsnCodeLookup)
 
         about_action = QAction('&About', self.appWindow)
@@ -84,8 +88,10 @@ class Application (QApplication):
         gstr2_json_to_xl_action.triggered.connect(
             lambda: self.menuActions.json_to_excel(2))
         txt_to_excel_action.triggered.connect(self.menuActions.txt_to_excel)
-        excel_parser_action.triggered.connect(self.menuActions.excel_parser)
-        send_mail_from_excel.triggered.connect(
+        extract_data_action.triggered.connect(self.menuActions.excel_parser)
+        extract_gstr2b_action.triggered.connect(
+            self.menuActions.extract_gstr2b)
+        send_mail_action.triggered.connect(
             self.menuActions.send_mail_for_gstr_itc_data)
         # hsnCodeLookup.triggered.connect(self.menuActions.hsn_code_lookup)
 

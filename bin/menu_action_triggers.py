@@ -92,6 +92,9 @@ class MenuBarAction:
         file_upload_window.cleanUp()
         del excel_parser
 
+    def extract_gstr2b(self):
+        pass
+
     def send_mail_for_gstr_itc_data(self):
         self.show_util_window()
 
