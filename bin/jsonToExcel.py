@@ -4,6 +4,8 @@ import os
 import traceback
 
 from lib import commonLib
+from lib.excel_lib import is_file_exists
+from lib.logging import UiLogger
 
 
 def get_value_from_dict(dict_obj, field_name, field_type):
@@ -17,24 +19,8 @@ def get_value_from_dict(dict_obj, field_name, field_type):
 
 
 class JsonToExcel:
-    def logMsg (self, level, message):
-        if level == 'ERROR':
-            message = message.replace ('\n', '<br/>')
-            (self.logViewer).append ('<font color="red">%s: %s</font>' % (level, message))
-        elif level == 'WARNING':
-            message = message.replace ('\n', '<br/>')
-            (self.logViewer).append ('<font color="#e6ac00">%s: %s</font>' % (level, message))
-        else:
-            (self.logViewer).append ('%s: %s' % (level, message))
-        return
-
-    def checkFileExists (self, jsonFileName):
-        errorCondition = False
-        if not(os.path.isfile (jsonFileName)):
-            message = "File '%s' does not exists !" % (jsonFileName)
-            self.logMsg ('ERROR', message)
-            errorCondition = True
-        return errorCondition
+    def __init__(self):
+        self.log = None
 
     def loadJsonData(self, json_file_name):
         with open(json_file_name, 'r') as filePtr:
@@ -44,11 +30,12 @@ class JsonToExcel:
     def print_gstin(self, json_obj):
         if 'gstin' in json_obj:
             gstin_in_file = json_obj['gstin']
-            self.logMsg('INFO', "GSTIN as per file '%s'" % gstin_in_file)
+            self.log.info("GSTIN as per file '%s'" % gstin_in_file)
         else:
-            self.logMsg('INFO', "GSTIN not present in json data")
+            self.log.info("GSTIN not present in json data")
 
-    def get_value_for_key(self, key, lookup_dict):
+    @staticmethod
+    def get_value_for_key(key, lookup_dict):
         value = key + ' not available'
         if key in lookup_dict:
             value = lookup_dict[key]
@@ -58,14 +45,13 @@ class JsonToExcel:
 class Gstr1(JsonToExcel):
     def __init__(self, progress_bar, log_viewer):
         self.progressBar = progress_bar
-        self.logViewer = log_viewer
-        return
+        self.log = UiLogger(log_viewer)
 
     def writeHsnData(self, jsonObj, worksheetObj):
         if 'hsn' in jsonObj:
             hsnDict = jsonObj['hsn']
             if 'data' in hsnDict:
-                self.logMsg('INFO', 'Writing HSN related data')
+                self.log.info('Writing HSN related data')
                 hsnHeadingDataRow = ['HSN Code', 'Product Desc', 'Units', 'S.Amt', 'C.Amt', 'Quantity', 'Value', 'Tax Value', 'Number', 'CS Amt', 'I.Amt']
                 worksheetObj.append(hsnHeadingDataRow)
 
@@ -78,14 +64,14 @@ class Gstr1(JsonToExcel):
                                   hsnDataRow['val'], hsnDataRow['txval'], hsnDataRow['num'], hsnDataRow['csamt'], hsnDataRow['iamt']]
                     worksheetObj.append(hsnDataRow)
             else:
-                self.logMsg('ERROR', 'HSN dictionary has no data array information')
+                self.log.error('HSN dictionary has no data array information')
         else:
-            self.logMsg('WARNING', 'Input file does not contain HSN related data')
+            self.log.warning('Input file does not contain HSN related data')
         return
 
     def writeB2CSData(self, stateList, jsonObj, worksheetObj):
         if 'b2cs' in jsonObj:
-            self.logMsg('INFO', 'Writing B2CS related data')
+            self.log.info('Writing B2CS related data')
             b2csHeadingRow = ['CS Amt', 'S Amt', 'Rate', 'Place of supply', 'Tax Value', 'Type', 'C Amt', 'Supply Type']
             worksheetObj.append(b2csHeadingRow)
 
@@ -103,12 +89,12 @@ class Gstr1(JsonToExcel):
                 b2csDataRow = [csamt, samt, rt, posData, txVal, typ, camt, splyType]
                 worksheetObj.append(b2csDataRow)
         else:
-            self.logMsg('WARNING', 'Input file does not contain B2CS related data')
+            self.log.info('Input file does not contain B2CS related data')
         return
 
     def write_b2b_data(self, stateList, jsonObj, worksheetObj):
         if 'b2b' in jsonObj:
-            self.logMsg('INFO', 'Writing B2B related data')
+            self.log.info('Writing B2B related data')
             b2bHeadingRow = ['GSTIN / UIN of Recipient', 'Invoice Number', 'Invoice Date', 'Invoice Value', 'Place of supply', 'Reverse Charge',
                              'Invoice Type', 'E-Commerce Gstin', 'Rate', 'Taxable Value', 'Cess Amount']
             worksheetObj.append(b2bHeadingRow)
@@ -142,13 +128,13 @@ class Gstr1(JsonToExcel):
                                     b2bDataRow = [ctin, invNum, invDate, invVal, invPos, invRevCharge, invType, invEcomGstin, invTaxRate, invTaxableVal, invCessAmt]
                                     worksheetObj.append(b2bDataRow)
                                 else:
-                                    self.logMsg('ERROR', "No item description available for invoice number '%s' dated '%s'" % (invNum, invDate))
+                                    self.log.error("No item description available for invoice number '%s' dated '%s'" % (invNum, invDate))
                         else:
-                            self.logMsg('ERROR', "No item data present for invoice '%s' for customer '%s'" % (invNum, ctin))
+                            self.log.error("No item data present for invoice '%s' for customer '%s'" % (invNum, ctin))
                 else:
-                    self.logMsg('ERROR', "No Invoice data present for '%s'" % ctin)
+                    self.log.error("No Invoice data present for '%s'" % ctin)
         else:
-            self.logMsg('WARNING', 'Input file does not contain B2B related data')
+            self.log.warning('Input file does not contain B2B related data')
         return
 
     def writeErrData(self, stateList, jsonObj, worksheetObj):
@@ -156,7 +142,7 @@ class Gstr1(JsonToExcel):
                               'Invoice Type', 'Place of Sale', 'No. of Items', 'S.Amt', 'C.Amt', 'Tax Rate', 'Taxable Amt', 'Invoice Value', 'Reverse Charge']
         if 'error_report' in jsonObj:
             for (errHeading, errData) in jsonObj['error_report'].items():
-                self.logMsg('INFO', 'Writing %s error report' % errHeading)
+                self.log.info('Writing %s error report' % errHeading)
                 errHeading = 'Error Report for %s' % errHeading
                 currErrorHeading = [errHeading]
                 worksheetObj.append(currErrorHeading)
@@ -202,8 +188,8 @@ class Gstr1(JsonToExcel):
 
                                 if 'num' in invItems:
                                     invItemNum  = invItems['num']
-                            #else:
-                            #    self.logMsg('ERROR', "Item data not available in JSON for inv# '%s' dated '%s'" % (invNum, invDate))
+                            # else:
+                            #     self.log.error("Item data not available in JSON for inv# '%s' dated '%s'" % (invNum, invDate))
 
                             if invType == 'R':
                                 invType = 'Regular'
@@ -214,27 +200,27 @@ class Gstr1(JsonToExcel):
                                           invType, invPos, invItemNum, invItemSAmt, invItemCAmt, invItemTaxRate, invItemTaxableVal, invVal, invRevCharge]
                             worksheetObj.append(errDataRow)
                     else:
-                        self.logMsg('ERROR', "No invoice data available for '%s'" % custTin)
+                        self.log.error("No invoice data available for '%s'"
+                                       % custTin)
                 worksheetObj.append([])
                 worksheetObj.append([])
         else:
-            self.logMsg('WARNING', 'Input file does not contain Error_Report data')
+            self.log.warning('Input file does not contain Error_Report data')
         return
 
     def convert(self, jsonFileName):
         outputFileName = jsonFileName.replace('.json', '.xlsx')
         stateList = commonLib.getStateList()
         # Check input file exists in file system
-        self.logMsg('INFO', 'Checking input file exists or not')
-        errorCondition = self.checkFileExists(jsonFileName)
-        if errorCondition:
+        self.log.info('Checking input file exists or not')
+        if is_file_exists(jsonFileName):
             return
 
         # Load JSON data from file
-        self.logMsg('INFO', "Loading JSON data from '%s'" % jsonFileName)
+        self.log.info("Loading JSON data from '%s'" % jsonFileName)
         json_obj = self.loadJsonData(jsonFileName)
         if not json_obj:
-            self.logMsg('ERROR', 'Unable to read JSON data from file')
+            self.log.error('Unable to read JSON data from file')
             return
 
         self.print_gstin(json_obj)
@@ -252,22 +238,22 @@ class Gstr1(JsonToExcel):
             self.write_b2b_data(stateList, json_obj, b2bWorksheet)
             self.writeErrData(stateList, json_obj, errWorksheet)
         except Exception:
-            self.logMsg('ERROR', 'Exception during file parsing -> %s' % traceback.format_exc())
+            self.log.error('Exception during file parsing -> %s'
+                           % traceback.format_exc())
 
         workbook.save(outputFileName)
-        self.logMsg('INFO', "Output saved in file '%s'" % outputFileName)
-        self.logMsg('::::::::::', 'Done ::::::::::')
-        return
+        self.log.info("Output saved in file '%s'" % outputFileName)
+        self.log.raw_line(':::::::::: Done ::::::::::')
 
 
 class Gstr2(JsonToExcel):
     def __init__(self, progress_bar, log_viewer):
         self.progressBar = progress_bar
-        self.logViewer = log_viewer
+        self.log = UiLogger(log_viewer)
 
     def write_b2b_data(self, stateList, jsonObj, worksheetObj):
         if 'b2b' in jsonObj:
-            self.logMsg('INFO', 'Writing B2B related data')
+            self.log.info('Writing B2B related data')
             b2bHeadingRow = ['GSTIN of Supplier', 'Invoice Number', 'Invoice Date', 'Invoice Value', 'Place of supply', 'Reverse Charge',
                              'Invoice Type', 'Rate', 'Taxable Value', 'Integrated Tax Paid', 'Central Tax Paid', 'State/UT Tax Paid', 'Cess Paid',
                              'Eligibility For ITC', 'Availed ITC Integrated Tax', 'Availed ITC Central Tax', 'Availed ITC State/UT Tax', 'Availed ITC Cess']
@@ -323,33 +309,32 @@ class Gstr2(JsonToExcel):
                                         invStateTaxPaid = itemData['itm_det']['camt']
 
                                     if invIntTaxPaid != 0 and invCentralTaxPaid != 0 and invStateTaxPaid != 0:
-                                        self.logMsg('ERROR', "All three taxes IGST, CGST and SGST present for invoice '%s' dated '%s'" % (invNum, invDate))
+                                        self.log.eror("All three taxes IGST, CGST and SGST present for invoice '%s' dated '%s'" % (invNum, invDate))
                                     else:
                                         b2bDataRow = [ctin, invNum, invDate, invVal, invPos, invRevCharge, invType, invTaxRate, invTaxableVal, invIntTaxPaid, invCentralTaxPaid, invStateTaxPaid, invCessPaid, invEligibilityOfItc, invAvailedItcIntTax, invAvailedItcCentralTax, invAvailedItcStateTax, invAvailedItcCess]
                                         worksheetObj.append(b2bDataRow)
                                         rowNum += 1
                         else:
-                            self.logMsg('ERROR', "No item data present for invoice '%s' for customer '%s'" % (invNum, ctin))
+                            self.log.error("No item data present for invoice '%s' for customer '%s'" % (invNum, ctin))
                 else:
-                    self.logMsg('ERROR', "No Invoice data present for '%s'" % ctin)
+                    self.log.error("No Invoice data present for '%s'" % ctin)
         else:
-            self.logMsg('WARNING', 'Input file does not contain B2B related data')
+            self.log.warning('Input file does not contain B2B related data')
         return
 
     def convert(self, json_file_name):
         output_file_name = json_file_name.replace('.json', '.xlsx')
         state_list = commonLib.getStateList()
         # Check input file exists in file system
-        self.logMsg('INFO', 'Checking input file exists or not')
-        error_condition = self.checkFileExists(json_file_name)
-        if error_condition:
+        self.log.info('Checking input file exists or not')
+        if not is_file_exists(json_file_name):
             return
 
         # Load JSON data from file
-        self.logMsg('INFO', "Loading JSON data from '%s'" % json_file_name)
+        self.log.info("Loading JSON data from '%s'" % json_file_name)
         json_obj = self.loadJsonData(json_file_name)
         if not json_obj:
-            self.logMsg('ERROR', 'Unable to read JSON data from file')
+            self.log.error('Unable to read JSON data from file')
             return
 
         self.print_gstin(json_obj)
@@ -367,8 +352,9 @@ class Gstr2(JsonToExcel):
             self.write_b2b_data(state_list, json_obj, b2b_worksheet)
             # self.writeErrData(stateList, jsonObj, errWorksheet)
         except Exception:
-            self.logMsg('ERROR', 'Exception during file parsing -> %s' % traceback.format_exc())
+            self.log.error('Exception during file parsing -> %s'
+                           % traceback.format_exc())
 
         workbook.save(output_file_name)
-        self.logMsg('INFO', "Output saved in file '%s'" % output_file_name)
-        self.logMsg('::::::::::', 'Done ::::::::::')
+        self.log.info("Output saved in file '%s'" % output_file_name)
+        self.log.raw_line(':::::::::: Done ::::::::::')

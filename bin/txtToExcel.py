@@ -1,57 +1,36 @@
 import openpyxl
-import os
 import traceback
 
 from lib import commonLib
+from lib.excel_lib import is_file_exists
+from lib.logging import UiLogger
 
 
 class TextToExcel:
     def __init__(self, progress_bar, log_viewer):
         self.progressBar = progress_bar
-        self.logViewer = log_viewer
-        return
-
-    def logMsg (self, level, message):
-        if level == 'ERROR':
-            message = message.replace ('\n', '<br/>')
-            (self.logViewer).append ('<font color="red">%s: %s</font>' % (level, message))
-        elif level == 'WARNING':
-            message = message.replace ('\n', '<br/>')
-            (self.logViewer).append ('<font color="#e6ac00">%s: %s</font>' % (level, message))
-        else:
-            (self.logViewer).append ('%s: %s' % (level, message))
-        return
-
-    def checkFileExists (self, inputFileName, printError=True):
-        errorCondition = False
-        if not(os.path.isfile (inputFileName)):
-            if printError:
-                message = "File '%s' does not exists !" % (inputFileName)
-                self.logMsg ('ERROR', message)
-            errorCondition = True
-        return errorCondition
-
-    def appendRowToWorksheet(self, worksheetObj, dataRow):
-        worksheetObj.append(dataRow)
-        return
+        self.log = UiLogger(log_viewer)
 
     def convert(self, input_file_name):
-        self.logMsg('INFO', "Processing file '%s'" % input_file_name)
+        self.log.info("Processing file '%s'" % input_file_name)
         output_file_name = input_file_name.split('/')
         worksheet = workbook = None
         file_name = (output_file_name.pop()).split('.')[0]
         if len(file_name) != 8:
-            self.logMsg('ERROR', "Invalid file name format '%s'. Use XXYY9999 format" % file_name)
+            self.log.error("Invalid file name format '%s'. Use XXYY9999 format"
+                           % file_name)
         else:
             comp_str = file_name[0:2]
             month_num = int(file_name[4:6])
             yr_num = int(file_name[6:8])
             data_type_str = file_name[2:4]
             output_file_name = '/'.join(output_file_name)
-            output_file_name += '/%s_%s%d.xlsx' % (comp_str, commonLib.getMonthStr(month_num, 3), yr_num)
+            output_file_name += '/%s_%s%d.xlsx'\
+                                % (comp_str,
+                                   commonLib.getMonthStr(month_num, 3),
+                                   yr_num)
 
-            fileNotExists = self.checkFileExists(output_file_name, printError=False)
-            if fileNotExists:
+            if is_file_exists(output_file_name):
                 workbook = openpyxl.Workbook()
                 workbook.guess_types = True
                 worksheet = workbook.create_sheet(data_type_str)
@@ -122,11 +101,12 @@ class TextToExcel:
 
                             xl_data_row.append(data)
 
-                        self.appendRowToWorksheet(worksheet, xl_data_row)
+                        worksheet.append(xl_data_row)
 
             workbook.save(output_file_name)
         except Exception:
-            self.logMsg ('ERROR', 'Exception during file parsing -> %s' % (traceback.format_exc()))
+            self.log.error('Exception during file parsing -> %s'
+                           % traceback.format_exc())
 
-        self.logMsg ('INFO', "Output saved in file '%s'" % output_file_name)
-        self.logMsg ('::::::::::', 'Done ::::::::::')
+        self.log.info("Output saved in file '%s'" % output_file_name)
+        self.log.raw_line(':::::::::: Done ::::::::::')

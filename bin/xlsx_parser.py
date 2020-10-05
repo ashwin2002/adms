@@ -5,44 +5,18 @@ from collections import OrderedDict
 
 import constants
 from constants.headers import ExcelHeaders
+from lib.excel_lib import is_row_blank, is_file_exists
+from lib.logging import UiLogger
 
 
 class ExcelParser:
     def __init__(self, progress_bar, log_viewer):
         self.progressBar = progress_bar
-        self.logViewer = log_viewer
-
-    @staticmethod
-    def is_row_blank(data_row):
-        for data in data_row:
-            if data is not None:
-                return False
-        return True
+        self.log = UiLogger(log_viewer)
 
     @staticmethod
     def get_excel_header(sheet_name):
         return getattr(getattr(constants, "headers"), sheet_name)
-
-    def logMsg(self, level, message):
-        if level == 'ERROR':
-            message = message.replace('\n', '<br/>')
-            self.logViewer.append('<font color="red">%s: %s</font>'
-                                  % (level, message))
-        elif level == 'WARNING':
-            message = message.replace('\n', '<br/>')
-            self.logViewer.append('<font color="#e6ac00">%s: %s</font>'
-                                  % (level, message))
-        else:
-            self.logViewer.append('%s: %s' % (level, message))
-
-    def check_file_exists(self, input_file_name, print_error=True):
-        error_condition = False
-        if not(os.path.isfile(input_file_name)):
-            if print_error:
-                message = "File '%s' does not exists !" % input_file_name
-                self.logMsg('ERROR', message)
-            error_condition = True
-        return error_condition
 
     def extract_data_from_excel_sheet(self, input_sheet_name, input_sheet,
                                       row_num, dwnload_val, gst_2yrm_val):
@@ -71,7 +45,7 @@ class ExcelParser:
                 input_row.append(cell_val)
 
             row_num += 1
-            if ExcelParser.is_row_blank(input_row):
+            if is_row_blank(input_row):
                 num_blank_rows += 1
                 continue
 
@@ -190,13 +164,11 @@ class ExcelParser:
         sheets_to_process['CDNR']['start_row'] = 7
         # sheets_to_process['CDNRA']['start_row'] = 8
 
-        self.logMsg('INFO', "Processing file '%s'" % input_file_name)
+        self.log.info("Processing file '%s'" % input_file_name)
         output_file_name = input_file_name.split('/')
         file_name = (output_file_name.pop()).split('.')[0]
         output_file_name = '/'.join(output_file_name)
         output_file_name += '/%s_parsed.xlsx' % file_name
-        file_not_exists = self.check_file_exists(output_file_name,
-                                                 print_error=False)
 
         file_name_data = \
             input_file_name \
@@ -212,7 +184,7 @@ class ExcelParser:
         try:
             # Load input / output workbooks
             input_workbook = openpyxl.load_workbook(input_file_name)
-            if file_not_exists:
+            if not is_file_exists(output_file_name):
                 output_workbook = openpyxl.Workbook()
                 output_workbook.guess_types = True
             else:
@@ -224,11 +196,10 @@ class ExcelParser:
                 if input_sheet_name not in input_workbook.get_sheet_names():
                     continue
 
-                self.logMsg('INFO', 'Processing sheet %s' % input_sheet_name)
+                self.log.info('Processing sheet %s' % input_sheet_name)
                 if input_sheet_name in output_workbook_sheets:
-                    self.logMsg('WARNING',
-                                'Sheet %s already exists !! Will recreate..'
-                                % input_sheet_name)
+                    self.log.warning('Sheet %s already exists! Will recreate..'
+                                     % input_sheet_name)
                     output_workbook.remove(
                         output_workbook.get_sheet_by_name(input_sheet_name))
                 input_sheet = input_workbook.get_sheet_by_name(
@@ -261,8 +232,8 @@ class ExcelParser:
 
             output_workbook.save(output_file_name)
         except Exception:
-            self.logMsg('ERROR', 'Exception during file parsing -> %s'
-                                 % (traceback.format_exc()))
+            self.log.error('Exception during file parsing -> %s'
+                           % (traceback.format_exc()))
 
-        self.logMsg('INFO', "Output saved in file '%s'" % output_file_name)
-        self.logMsg('::::::::::', 'Done ::::::::::')
+        self.log.info("Output saved in file '%s'" % output_file_name)
+        self.log.raw_line(':::::::::: Done ::::::::::')
