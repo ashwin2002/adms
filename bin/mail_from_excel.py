@@ -3,11 +3,9 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from data.input_misssing_mail import \
-    html_header, html_footer, \
-    msg_header, mail_msg, mail_subject, \
-    tr_format, total_row_format
-from data.mail import Info, Smtp
+from data import company
+from data.inputs_mail import mail_info
+from data.mail import Smtp
 from lib.excel_lib import is_file_exists, is_row_blank
 from lib.logging import UiLogger
 
@@ -16,7 +14,6 @@ class MailFromExcel:
     def __init__(self, progress_bar, log_viewer):
         self.progressBar = progress_bar
         self.log = UiLogger(log_viewer)
-        return
 
     @staticmethod
     def insert_data(t_type, d_row, excel_data_dict):
@@ -51,10 +48,11 @@ class MailFromExcel:
         company_initial = file_name[0]
         company_file_data = "%s %s - " % (company_initial, file_name[1])
 
-        if company_initial not in Info.contact.keys() \
-                or Info.contact[company_initial]["mail"] == "":
-            print("Exiting: Mail id not defined for '%s'" % company_initial)
-            exit(0)
+        if company_initial not in company.info \
+                or company.info[company_initial]["mail"] == "":
+            self.log.error("Exiting: Mail id not defined for '%s'"
+                           % company_initial)
+            return
 
         for input_sheet_name in input_workbook.get_sheet_names():
             if input_sheet_name != "PR":
@@ -115,7 +113,6 @@ class MailFromExcel:
                 # Fetching date for GST_PORTAL data
                 if gst_portal_line_found:
                     report_date = data_row[3]
-                    print(report_date)
 
                 if data_row[6] == "from GST Portal":
                     gst_portal_line_found = True
@@ -125,37 +122,39 @@ class MailFromExcel:
             report_date = "/".join(report_date.split(".")[1:])
             mail_count = 0
             for r_type, excel_data in excel_data_dict.items():
+                m_data = mail_info[r_type]
                 smtp_session = None
                 if excel_data.keys():
-                    print("Connecting to server...")
+                    self.log.info("Connecting to server...")
                     smtp_session = smtplib.SMTP(Smtp.server, Smtp.port)
                     smtp_session.ehlo()
                     smtp_session.starttls()
                     smtp_session.ehlo()
                     smtp_session.login(Smtp.user_name, Smtp.password)
-                    print("Login successful")
+                    self.log.info("Login successful")
 
-                comp_name = Info.contact[company_initial]["name"]
+                comp_name = company.info[company_initial]["name"]
                 curr_html_header = \
-                    html_header % (msg_header[r_type] % comp_name,
-                                   mail_msg[r_type])
+                    mail_info["html_header"] % (m_data["heading"] % comp_name,
+                                                m_data["message"])
                 html_footer_comp_name = ""
                 if r_type == "itc_na":
                     html_footer_comp_name = comp_name
-                curr_html_footer = html_footer % (html_footer_comp_name,
-                                                  report_date)
+                curr_html_footer = \
+                    mail_info["html_footer"] % (html_footer_comp_name,
+                                                report_date)
                 total = 0
                 for supp_name, supp_data in excel_data.items():
                     total += len(supp_data["rows"])
-                    print("Sending mail for %s..." % supp_name)
+                    self.log.info("Sending mail for %s..." % supp_name)
                     msg = MIMEMultipart('alternative')
                     msg['From'] = Smtp.user_name
-                    msg['To'] = Info.contact[company_initial]["mail"]
+                    msg['To'] = company.info[company_initial]["mail"]
                     msg['Subject'] = "%s %s::%s - %s" \
                                      % (company_file_data,
                                         supp_name,
                                         supp_data["tin"],
-                                        mail_subject[r_type])
+                                        m_data["subject"])
                     total_igst = 0
                     total_cgst = 0
                     total_sgst = 0
@@ -163,13 +162,13 @@ class MailFromExcel:
                     for row in supp_data["rows"]:
                         row[0] = row[0].replace('=CONCATENATE("', '')
                         row[0] = row[0].rstrip('")')
-                        mail_data += tr_format % tuple(row)
+                        mail_data += mail_info["table_tr_format"] % tuple(row)
                         total_igst += float(row[4])
                         total_cgst += float(row[5])
                         total_sgst += float(row[6])
 
                     if len(supp_data["rows"]) > 1:
-                        mail_data += total_row_format \
+                        mail_data += mail_info["table_total_tr_format"] \
                                      % (total_igst, total_cgst, total_sgst)
 
                     data_payload = MIMEText(curr_html_header
@@ -180,7 +179,7 @@ class MailFromExcel:
                     # msg.attach(data_to_attach)
                     smtp_session.sendmail(
                         Smtp.user_name,
-                        Info.contact[company_initial]["mail"],
+                        company.info[company_initial]["mail"],
                         msg.as_string())
                     mail_count += 1
 
