@@ -84,7 +84,7 @@ class ExcelParser:
             input_row[inv_num_index] = "=CONCATENATE(\"%s\")" \
                                        % input_row[inv_num_index]
             for index, d_type in enumerate(sheet_header):
-                if d_type == t_header.DUPLICATE:
+                if d_type == t_header.DUMMY:
                     continue
                 try:
                     d_index = input_header.index(d_type)

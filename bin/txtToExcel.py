@@ -7,7 +7,7 @@ from lib import commonLib
 
 class TextToExcel:
     def __init__(self, progress_bar, log_viewer):
-        self.prgressBar = progress_bar
+        self.progressBar = progress_bar
         self.logViewer = log_viewer
         return
 
