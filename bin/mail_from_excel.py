@@ -9,7 +9,7 @@ from data.input_misssing_mail import \
     tr_format, total_row_format
 from data.mail import Info, Smtp
 from lib.excel_lib import is_file_exists, is_row_blank
-from lib.logger import UiLogger
+from lib.logging import UiLogger
 
 
 class MailFromExcel:

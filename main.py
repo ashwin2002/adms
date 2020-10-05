@@ -116,7 +116,8 @@ class Application (QApplication):
         osFunctions.create_dir([self.settings['log']['path'],
                                 self.settings['data']['path']])
 
-        self.logger = logging.Logger(self.settings['log']['path'], 'debug.log')
+        self.logger = logging.FileLogger(self.settings['log']['path'],
+                                         'debug.log')
         self.logger.open_log_file()
         self.load_basic_ui()
 
