@@ -7,11 +7,10 @@ class MenuBarAction:
         self.appWindow = app_window
         self.window = util_window
         self.logger = logger
-        return
 
     def show_about(self):
-        self.logger.showDialogToUser('About', 'Version: 0.0',
-                                     self.appWindow, 'about')
+        self.logger.show_dialog_to_user('About', 'Version: 0.0',
+                                        self.appWindow, 'about')
 
     def show_util_window(self):
         self.window.clearWidgets()

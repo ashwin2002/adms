@@ -9,12 +9,12 @@ class FileLogger:
         self.activeUser = active_user
         self.logFileHandle = None
 
-    def selfDestroy(self):
-        self.log_msg('INFO', 'Destroying ' + self.__class__.__name__ + ' class')
+    def destroy(self):
+        self.log_msg('INFO', 'Destroying '+self.__class__.__name__+' class')
         self.close_log_file()
         del self
 
-    def setActiveUser(self, u_name):
+    def set_active_user(self, u_name):
         self.activeUser = u_name
 
     def open_log_file(self):
@@ -31,8 +31,9 @@ class FileLogger:
             self.logFileHandle.write(curr_time + '(' + self.activeUser + ') '
                                      + level + ' : ' + message + '\n')
 
-    def showDialogToUser(self, title, message,
-                         parent_window=None, dialog_type='INFO'):
+    @staticmethod
+    def show_dialog_to_user(title, message,
+                            parent_window=None, dialog_type='INFO'):
         _ = Popup(dialog_type, title, message, parent_window)
 
 
