@@ -144,7 +144,7 @@ class ExcelParser:
 
             d_index = xl_class.output_header["B2B"].index(
                 b2b_headers_class.INV_TYPE)
-            if input_sheet_name == "B2BA":
+            if input_sheet_name != "B2B":
                 row_data.pop(d_index)
                 row_data.insert(d_index, input_sheet_name)
             if row_data[d_index].lower() == "credit note":
