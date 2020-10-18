@@ -35,4 +35,3 @@ def get_target_excel_class(gst_2yrm_val):
     if int(gst_2yrm_val[4:6]) < 7 and int(gst_2yrm_val[0:4]) <= 2020:
         return HeadersTillJun2020
     return HeadersJul2020Current
-
