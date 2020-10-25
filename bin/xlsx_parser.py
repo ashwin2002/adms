@@ -41,6 +41,7 @@ class ExcelParser:
 
             data_row = [None for _ in sheet_header]
             input_row = list()
+
             curr_col = "A"
             for index in range(len(sheet_header)):
                 cell_val = input_sheet[curr_col + str(row_num)].value
@@ -100,6 +101,15 @@ class ExcelParser:
                     t_header.DOWNLOAD)] = dwnload_val
                 data_row[sheet_header.index(
                     t_header.GST2_YRM)] = gst_2yrm_val
+            elif input_sheet_name == "IMPG":
+                data_row[sheet_header.index(t_header.GSTIN)] = "07INDIANCUSTOMS"
+                data_row[sheet_header.index(t_header.SUPP_NAME)] = \
+                    "Indian Customs"
+                data_row[sheet_header.index(t_header.INV_VALUE)] = \
+                    data_row[sheet_header.index(t_header.TAXABLE)] \
+                    + data_row[sheet_header.index(t_header.IGST_PAID)]
+                data_row[sheet_header.index(t_header.SUBMITTED)] = 'SUBMITTED'
+                data_row[sheet_header.index(t_header.GST3_YRM)] = 'Y'
             rows_to_append.append(data_row)
         return rows_to_append
 
@@ -144,7 +154,7 @@ class ExcelParser:
 
             d_index = xl_class.output_header["B2B"].index(
                 b2b_headers_class.INV_TYPE)
-            if input_sheet_name != "B2B":
+            if input_sheet_name != "B2B" and row_data[d_index] == "":
                 row_data.pop(d_index)
                 row_data.insert(d_index, input_sheet_name)
             if row_data[d_index].lower() == "credit note":
