@@ -69,7 +69,7 @@ class HeadersTillJun2020(object):
         CDNRA.SGST_PAID, CDNRA.SUBMITTED]
 
 
-class HeadersJul2020Current(HeadersTillJun2020):
+class HeadersJul2020Current(object):
     input_header = OrderedDict()
     output_header = dict()
     start_row = dict()
@@ -139,26 +139,13 @@ class HeadersJul2020Current(HeadersTillJun2020):
         B2B.AMENDMENT, B2B.TAX_PERIOD, B2B.EFFECTIVE_CANCELLATION_DATE,
         B2B.TCS_NET, B2B.PORT_CODE]
 
-    output_header['B2BA'] = [
-        B2BA.GSTIN, B2BA.SUPP_NAME, B2BA.INV_NO, B2BA.INV_DATE,
-        B2BA.INV_VALUE, B2BA.PLACE, B2BA.RCM, B2BA.INV_TYPE, B2BA.RATE,
-        B2BA.TAXABLE, B2BA.IGST_PAID, B2BA.CGST_PAID, B2BA.SGST_PAID,
-        B2BA.CESS_PAID, B2BA.IGST_AVAILED, B2BA.CGST_AVAILED,
-        B2BA.SGST_AVAILED, B2BA.CESS_AVAILED, B2BA.DOWNLOAD_DATE,
-        B2BA.GST2_YRM, B2BA.SUBMITTED]
-
-    output_header['CDNR'] = [
-        CDNR.GSTIN, CDNR.SUPP_NAME, CDNR.INV_TYPE, CDNR.INV_NO,
-        CDNR.INV_DATE, CDNR.INV_VALUE, CDNR.PLACE, CDNR.RCM,
-        CDNR.RATE, CDNR.TAXABLE, CDNR.IGST_PAID, CDNR.CGST_PAID,
-        CDNR.SGST_PAID, CDNR.CESS_PAID, CDNR.SUBMITTED]
-
-    output_header['CDNRA'] = [
-        CDNRA.GSTIN, CDNRA.SUPP_NAME, CDNRA.INV_TYPE, CDNRA.INV_NO,
-        CDNRA.INV_DATE, CDNRA.INV_VALUE, CDNRA.PLACE,
-        CDNRA.RATE, CDNRA.TAXABLE, CDNRA.IGST_PAID, CDNRA.CGST_PAID,
-        CDNRA.SGST_PAID, CDNRA.SUBMITTED]
-
-    output_header["TDS"] = input_header["TDS"]
-    output_header["TCS"] = input_header["TCS"]
-    output_header["IMPG"] = input_header["IMPG"]
+    output_header['B2BA'] = input_header['B2BA']
+    output_header['CDNR'] = input_header['CDNR']
+    output_header['CDNRA'] = input_header['CDNRA']
+    output_header['TDS'] = input_header['TDS']
+    output_header['TCS'] = input_header['TCS']
+    output_header["IMPG"] = [
+        IMPG.GSTIN, IMPG.SUPP_NAME, IMPG.GSTR1_FILED_DATE, IMPG.PORT_CODE,
+        IMPG.INV_NO, IMPG.INV_DATE, IMPG.TAXABLE, IMPG.IGST_PAID,
+        IMPG.CESS_PAID, IMPG.INV_VALUE, IMPG.SUBMITTED, IMPG.GST1_YRM,
+        IMPG.GST3_YRM, IMPG.AMENDMENT]
