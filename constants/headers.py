@@ -4,33 +4,33 @@ class Gstr(object):
 
 
 class B2B(Gstr):
-    SUPP_NAME = "SUPPNAME"
-    INV_NO = "INVNO"
-    INV_DATE = "INVDATE"
-    INV_VALUE = "INVVALUE"
-    PLACE = "PLACE"
+    SUPP_NAME = "SUPP_NAME"
+    INV_NO = "INV_NO"
+    INV_DATE = "INV_DATE"
+    INV_VALUE = "INV_VALUE"
+    PLACE = "Place"
     RCM = "RCM"
-    INV_TYPE = "INVTYPE"
-    RATE = "RATE"
-    TAXABLE = "TAXABLE"
-    IGST_PAID = "IGSTPAID"
-    CGST_PAID = "CGSTPAID"
-    SGST_PAID = "SGSTPAID"
-    CESS_PAID = "CESSPAID"
-    ELIGIBLE = "ELIGIBLE"
-    IGST_AVAILED = "IGSTAVAILD"
-    CGST_AVAILED = "CGSTAVAILD"
-    SGST_AVAILED = "SGSTAVAILD"
-    CESS_AVAILED = "CESSAVAILD"
+    INV_TYPE = "INV_TYPE"
+    RATE = "Rate"
+    TAXABLE = "Taxable"
+    IGST_PAID = "IGST_Paid"
+    CGST_PAID = "CGST_Paid"
+    SGST_PAID = "SGST_Paid"
+    CESS_PAID = "CESS_Paid"
+    ELIGIBLE = "Eligible"
+    IGST_AVAILED = "IGST_AVAILD"
+    CGST_AVAILED = "CGST_AVAILD"
+    SGST_AVAILED = "SGST_AVAILD"
+    CESS_AVAILED = "CESS_AVAILD"
     DOWNLOAD = "DWNLOAD"
     GST2_YRM = "GST2YRM"
-    SUBMITTED = "SUBMITTED"
-    GSTR1_FILED_DATE = "GSTR1FILEDDATE"
+    SUBMITTED = "Submitted"
+    GSTR1_FILED_DATE = "GSTR1_FILED_DATE"
     GST1_YRM = "GST1YRM"
     GST3_YRM = "GST3YRM"
-    AMENDMENT = "AMENDMENT"
-    TAX_PERIOD = "TAXPERIOD"
-    EFFECTIVE_CANCELLATION_DATE = "EFFCANCELDATE"
+    AMENDMENT = "Amendment"
+    TAX_PERIOD = "TAX_PERIOD"
+    EFFECTIVE_CANCELLATION_DATE = "EFF_CANCEL_DATE"
     PORT_CODE = "PORT_CODE"
     TCS_NET = "TCS_NET"
 
@@ -43,23 +43,7 @@ class B2B(Gstr):
 
 
 class B2BA(B2B):
-    INV_NO = "INV No"
-    INV_DATE = "INV Date"
-    INV_VALUE = "INV Value"
-    INV_TYPE = "INV Type"
-    PLACE = "Place"
-    RATE = "Rate"
-    TAXABLE = "Taxable"
-    IGST_PAID = "IGST"
-    CGST_PAID = "CGST"
-    SGST_PAID = "SGST"
-    CESS_PAID = "CESS"
-    IGST_AVAILED = "IGST availed"
-    CGST_AVAILED = "CGST availed"
-    SGST_AVAILED = "SGST availed"
-    CESS_AVAILED = "CESS availed"
-    DOWNLOAD_DATE = "Download date"
-    SUBMITTED = "Submitted"
+    DOWNLOAD_DATE = "Download_date"
 
     @staticmethod
     def get_dict():
@@ -71,12 +55,7 @@ class B2BA(B2B):
 
 class CDNR(B2BA):
     INV_TYPE = "Note Type"
-    SUPP_NAME = "SUPP Name"
     REASON = "Reason"
-    IGST_PAID = "IGST Paid"
-    CGST_PAID = "CGST Paid"
-    SGST_PAID = "SGST Paid"
-    CESS_PAID = "CESS Paid"
 
     @staticmethod
     def get_dict():
