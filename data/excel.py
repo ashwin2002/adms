@@ -68,6 +68,14 @@ class HeadersTillJun2020(object):
         CDNRA.RATE, CDNRA.TAXABLE, CDNRA.IGST_PAID, CDNRA.CGST_PAID,
         CDNRA.SGST_PAID, CDNRA.SUBMITTED]
 
+    dbf_spec = "GSTIN C(18); INVNO C(16); INVDATE D; INVVALUE N(15,2); " \
+               "PLACE C(11); RCM C(5); INVTYPE C(8); RATE N(15,2); " \
+               "TAXABLE N(15,2); IGSTPAID N(15,2); CGSTPAID N(15,2); " \
+               "SGSTPAID N(15,2); CESSPAID N(15,2); ELIGIBLE C(15); " \
+               "IGSTAVAILD N(15,2); CGSTAVAILD N(15,2); SGSTAVAILD N(15,2); " \
+               "CESSAVAILD N(15,2); DWNLOAD D, GST2YRM C(9); " \
+               "SUPPNAME C(35); SUBMITTED C(11)"
+
 
 class HeadersJul2020Current(object):
     input_header = OrderedDict()
@@ -149,3 +157,13 @@ class HeadersJul2020Current(object):
         IMPG.INV_NO, IMPG.INV_DATE, IMPG.TAXABLE, IMPG.IGST_PAID,
         IMPG.CESS_PAID, IMPG.INV_VALUE, IMPG.SUBMITTED, IMPG.GST1_YRM,
         IMPG.GST3_YRM, IMPG.AMENDMENT]
+
+    dbf_spec = "GSTIN C(18); INVNO C(16); INVDATE D; INVVALUE N(15,2); " \
+               "PLACE C(11); RCM C(5); INVTYPE C(8); RATE N(15,2); " \
+               "TAXABLE N(15,2); IGSTPAID N(15,2); CGSTPAID N(15,2); " \
+               "SGSTPAID N(15,2); CESSPAID N(15,2); ELIGIBLE C(15); " \
+               "IGSTAVAILD N(15,2); CGSTAVAILD N(15,2); SGSTAVAILD N(15,2); " \
+               "CESSAVAILD N(15,2); DWNLOAD D; GST2YRM C(9); " \
+               "SUPPNAME C(35); SUBMITTED C(11); GSTR1FILED C(9); " \
+               "GST1YRM C(9); GST3YRM C(9); AMENDMENT C(9); TAXPERIOD C(9); " \
+               "EFFCANCELD C(9); TCS_NET C(9); PORT_CODE C(9)"

@@ -1,3 +1,4 @@
+import dbf
 import openpyxl
 import traceback
 
@@ -15,6 +16,83 @@ class ExcelParser:
     @staticmethod
     def get_excel_header(sheet_name):
         return getattr(getattr(constants, "headers"), sheet_name)
+
+    def create_dbf(self, parsed_xl_file_name, xl_class):
+        start_col = "A"
+        row_num = 1
+        output_dbf_file_name = "".join(parsed_xl_file_name.split(".")[0:-1]) \
+                               + ".dbf"
+        self.log.info("Creating DBF file from %s::B2B data"
+                      % parsed_xl_file_name)
+        b2b_sheet = openpyxl.load_workbook(parsed_xl_file_name)["B2B"]
+        fields_in_dbf = [field.strip().split(' ')
+                         for field in xl_class.dbf_spec.split(";")]
+        fields_in_b2b = list()
+
+        # Read first_row to get the fields from XL
+        curr_col = start_col
+        null_data = False
+        while not null_data:
+            cell_val = b2b_sheet[curr_col + str(row_num)].value or ""
+            if cell_val.strip() == "":
+                break
+            fields_in_b2b.append(cell_val)
+            curr_col = get_next_col(curr_col)
+
+        dbf_field_len = len(fields_in_dbf)
+        b2b_field_len = len(fields_in_b2b)
+        self.log.info("Total fields in B2B=%d, dbf_spec=%d"
+                      % (b2b_field_len, dbf_field_len))
+        if b2b_field_len != dbf_field_len:
+            self.log.error("Cannot process in incompatible field count")
+            return
+
+        # Create DBF file for writing data
+        dbf_table = dbf.Table(output_dbf_file_name,
+                              field_specs=xl_class.dbf_spec)
+        dbf_table.open(mode=dbf.READ_WRITE)
+
+        # Starting converting Xl -> DBF
+        while True:
+            curr_col = start_col
+            row_num += 1
+            row_data = list()
+            for index, field_spec in enumerate(fields_in_dbf):
+                cell_val = b2b_sheet[curr_col + str(row_num)].value
+                if cell_val is None:
+                    if index == 0:
+                        break
+                    else:
+                        cell_val = ""
+                curr_col = get_next_col(curr_col)
+
+                if field_spec[1][0] == "D":
+                    t_val = cell_val.split("-")
+                    d_format = "%d"
+                    m_format = "%m"
+                    y_format = "%Y"
+                    if len(t_val[1]) == 3:
+                        m_format = "%b"
+                    if len(t_val[2]) == 2:
+                        y_format = "%y"
+                    cell_val = dbf.Date.strptime(cell_val,
+                                                 "%s-%s-%s" % (d_format,
+                                                               m_format,
+                                                               y_format))
+                elif field_spec[1][0] == "N":
+                    if cell_val == "":
+                        cell_val = 0
+                elif field_spec[1][0] == "C":
+                    cell_val = cell_val[:int(field_spec[1][2:-1])]
+
+                row_data.append(cell_val)
+            if not row_data:
+                break
+
+            dbf_table.append(tuple(row_data))
+
+        dbf_table.close()
+        self.log.info("Done writing DBF file %s" % output_dbf_file_name)
 
     def extract_data_from_excel_sheet(self, input_sheet_name, input_sheet,
                                       row_num, dwnload_val, gst_2yrm_val):
@@ -61,8 +139,9 @@ class ExcelParser:
                     continue
 
             if inv_num_index != -1:
-                input_row[inv_num_index] = "=CONCATENATE(\"%s\")" \
-                                           % input_row[inv_num_index]
+                # input_row[inv_num_index] = "=CONCATENATE(\"%s\")" \
+                #                            % input_row[inv_num_index]
+                input_row[inv_num_index] = input_row[inv_num_index]
             for index, d_type in enumerate(sheet_header):
                 if d_type == t_header.DUMMY:
                     continue
@@ -102,7 +181,8 @@ class ExcelParser:
                 data_row[sheet_header.index(
                     t_header.GST2_YRM)] = gst_2yrm_val
             elif input_sheet_name == "IMPG":
-                data_row[sheet_header.index(t_header.GSTIN)] = "07INDIANCUSTOMS"
+                data_row[sheet_header.index(t_header.GSTIN)] = \
+                    "07INDIANCUSTOMS"
                 data_row[sheet_header.index(t_header.SUPP_NAME)] = \
                     "Indian Customs"
                 data_row[sheet_header.index(t_header.INV_VALUE)] = \
@@ -240,9 +320,10 @@ class ExcelParser:
                         output_sheet.append(row)
 
             output_workbook.save(output_file_name)
+            self.log.info("Output saved in file '%s'" % output_file_name)
+            self.create_dbf(output_file_name, xl_class)
         except Exception:
             self.log.error('Exception during file parsing -> %s'
                            % (traceback.format_exc()))
 
-        self.log.info("Output saved in file '%s'" % output_file_name)
         self.log.raw_line(':::::::::: Done ::::::::::')
