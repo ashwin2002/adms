@@ -1,9 +1,8 @@
 import json
 import openpyxl
-import os
 import traceback
 
-from lib import commonLib
+from constants.common import state_list
 from lib.excel_lib import is_file_exists
 from lib.logging import UiLogger
 
@@ -69,7 +68,7 @@ class Gstr1(JsonToExcel):
             self.log.warning('Input file does not contain HSN related data')
         return
 
-    def writeB2CSData(self, stateList, jsonObj, worksheetObj):
+    def writeB2CSData(self, jsonObj, worksheetObj):
         if 'b2cs' in jsonObj:
             self.log.info('Writing B2CS related data')
             b2csHeadingRow = ['CS Amt', 'S Amt', 'Rate', 'Place of supply', 'Tax Value', 'Type', 'C Amt', 'Supply Type']
@@ -77,7 +76,7 @@ class Gstr1(JsonToExcel):
 
             for b2csRow in jsonObj['b2cs']:
                 posVal = int(b2csRow['pos'])
-                posData = '%02d - %s' % (posVal, stateList[posVal - 1])
+                posData = '%02d - %s' % (posVal, state_list[posVal - 1])
 
                 csamt = get_value_from_dict(b2csRow, 'csamt', 'amt')
                 samt = get_value_from_dict(b2csRow, 'samt', 'amt')
@@ -92,7 +91,7 @@ class Gstr1(JsonToExcel):
             self.log.info('Input file does not contain B2CS related data')
         return
 
-    def write_b2b_data(self, stateList, jsonObj, worksheetObj):
+    def write_b2b_data(self, jsonObj, worksheetObj):
         if 'b2b' in jsonObj:
             self.log.info('Writing B2B related data')
             b2bHeadingRow = ['GSTIN / UIN of Recipient', 'Invoice Number', 'Invoice Date', 'Invoice Value', 'Place of supply', 'Reverse Charge',
@@ -112,7 +111,8 @@ class Gstr1(JsonToExcel):
 
                         try:
                             posVal = int(invData['pos'])
-                            invPos = '%02d - %s' % (posVal, stateList[posVal - 1])
+                            invPos = '%02d - %s' % (posVal,
+                                                    state_list[posVal - 1])
                         except:
                             invPos = 'State not available'
 
@@ -137,7 +137,7 @@ class Gstr1(JsonToExcel):
             self.log.warning('Input file does not contain B2B related data')
         return
 
-    def writeErrData(self, stateList, jsonObj, worksheetObj):
+    def writeErrData(self, jsonObj, worksheetObj):
         errTableHeadingRow = ['Invoice #', 'Invoice Date', 'Customer TIN', 'Error Code', 'Error Message',
                               'Invoice Type', 'Place of Sale', 'No. of Items', 'S.Amt', 'C.Amt', 'Tax Rate', 'Taxable Amt', 'Invoice Value', 'Reverse Charge']
         if 'error_report' in jsonObj:
@@ -194,7 +194,8 @@ class Gstr1(JsonToExcel):
                             if invType == 'R':
                                 invType = 'Regular'
 
-                            invPos = '%02d - %s' % (invPos, stateList[invPos - 1])
+                            invPos = '%02d - %s' % (invPos,
+                                                    state_list[invPos - 1])
 
                             errDataRow = [invNum, invDate, custTin, errCode, errMsg,
                                           invType, invPos, invItemNum, invItemSAmt, invItemCAmt, invItemTaxRate, invItemTaxableVal, invVal, invRevCharge]
@@ -210,7 +211,6 @@ class Gstr1(JsonToExcel):
 
     def convert(self, jsonFileName):
         outputFileName = jsonFileName.replace('.json', '.xlsx')
-        stateList = commonLib.getStateList()
         # Check input file exists in file system
         self.log.info('Checking input file exists or not')
         if is_file_exists(jsonFileName):
@@ -234,9 +234,9 @@ class Gstr1(JsonToExcel):
 
         try:
             self.writeHsnData(json_obj, hsnWorksheet)
-            self.writeB2CSData(stateList, json_obj, b2csWorksheet)
-            self.write_b2b_data(stateList, json_obj, b2bWorksheet)
-            self.writeErrData(stateList, json_obj, errWorksheet)
+            self.writeB2CSData(json_obj, b2csWorksheet)
+            self.write_b2b_data(json_obj, b2bWorksheet)
+            self.writeErrData(json_obj, errWorksheet)
         except Exception:
             self.log.error('Exception during file parsing -> %s'
                            % traceback.format_exc())
@@ -251,7 +251,7 @@ class Gstr2(JsonToExcel):
         self.progressBar = progress_bar
         self.log = UiLogger(log_viewer)
 
-    def write_b2b_data(self, stateList, jsonObj, worksheetObj):
+    def write_b2b_data(self, jsonObj, worksheetObj):
         if 'b2b' in jsonObj:
             self.log.info('Writing B2B related data')
             b2bHeadingRow = ['GSTIN of Supplier', 'Invoice Number', 'Invoice Date', 'Invoice Value', 'Place of supply', 'Reverse Charge',
@@ -272,7 +272,8 @@ class Gstr2(JsonToExcel):
 
                         try:
                             posVal = int(invData['pos'])
-                            invPos = '%02d-%s' % (posVal, stateList[posVal - 1])
+                            invPos = '%02d-%s' % (posVal,
+                                                  state_list[posVal - 1])
                         except:
                             invPos = 'State not available'
 
@@ -324,7 +325,7 @@ class Gstr2(JsonToExcel):
 
     def convert(self, json_file_name):
         output_file_name = json_file_name.replace('.json', '.xlsx')
-        state_list = commonLib.getStateList()
+        state_list = state_list
         # Check input file exists in file system
         self.log.info('Checking input file exists or not')
         if not is_file_exists(json_file_name):
@@ -348,9 +349,9 @@ class Gstr2(JsonToExcel):
 
         try:
             # self.writeHsnData(jsonObj, hsnWorksheet)
-            # self.writeB2CSData(stateList, jsonObj, b2csWorksheet)
-            self.write_b2b_data(state_list, json_obj, b2b_worksheet)
-            # self.writeErrData(stateList, jsonObj, errWorksheet)
+            # self.writeB2CSData(jsonObj, b2csWorksheet)
+            self.write_b2b_data(json_obj, b2b_worksheet)
+            # self.writeErrData(jsonObj, errWorksheet)
         except Exception:
             self.log.error('Exception during file parsing -> %s'
                            % traceback.format_exc())
