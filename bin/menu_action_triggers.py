@@ -93,7 +93,23 @@ class MenuBarAction:
         del excel_parser
 
     def extract_gstr2b(self):
-        pass
+        self.show_util_window()
+
+        file_upload_window = fileUpload.FileUploader(self.window)
+        selected_files = file_upload_window.acceptInputFiles(
+            'Input xlsx file', 'Xlsx (*.xlsx)', self.window)
+
+        excel_parser = xlsx_parser.Gstr2bParser(file_upload_window.progressBar,
+                                                file_upload_window.logViewer)
+        for txtFile in selected_files:
+            excel_parser.convert(txtFile)
+            file_upload_window.totalPercent += file_upload_window.filePercent
+            file_upload_window.progressBar.setValue(
+                file_upload_window.totalPercent)
+
+        file_upload_window.progressBar.setValue(100)
+        file_upload_window.cleanUp()
+        del excel_parser
 
     def send_mail_for_gstr_itc_data(self):
         self.show_util_window()

@@ -35,6 +35,7 @@ class B2B(Gstr):
     EFFECTIVE_CANCELLATION_DATE = "EFF_CANCEL_DATE"
     PORT_CODE = "PORT_CODE"
     TCS_NET = "TCS_NET"
+    APPLICABLE_TAX_RATE = "APPLICABLE_TAX_RATE"
 
     @staticmethod
     def get_dict():
