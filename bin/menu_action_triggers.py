@@ -80,7 +80,7 @@ class MenuBarAction:
         selected_files = file_upload_window.acceptInputFiles(
             'Input xlsx file', 'Xlsx (*.xlsx)', self.window)
 
-        excel_parser = xlsx_parser.ExcelParser(file_upload_window.progressBar,
+        excel_parser = xlsx_parser.Gstr2Parser(file_upload_window.progressBar,
                                                file_upload_window.logViewer)
         for txtFile in selected_files:
             excel_parser.convert(txtFile)

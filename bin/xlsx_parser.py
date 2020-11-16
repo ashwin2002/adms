@@ -3,12 +3,12 @@ import openpyxl
 import traceback
 
 import constants
-from lib.excel_lib import is_row_blank, is_file_exists, get_target_excel_class, \
-    get_next_col
+from lib.excel_lib import is_row_blank, is_file_exists, \
+                          get_target_excel_class, get_next_col
 from lib.logging import UiLogger
 
 
-class ExcelParser:
+class GstrParser:
     def __init__(self, progress_bar, log_viewer):
         self.progressBar = progress_bar
         self.log = UiLogger(log_viewer)
@@ -16,6 +16,11 @@ class ExcelParser:
     @staticmethod
     def get_excel_header(sheet_name):
         return getattr(getattr(constants, "headers"), sheet_name)
+
+    @staticmethod
+    def get_month_abbr(month_num):
+        return ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+                'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month_num]
 
     def create_dbf(self, parsed_xl_file_name, xl_class):
         start_col = "A"
@@ -94,12 +99,71 @@ class ExcelParser:
         dbf_table.close()
         self.log.info("Done writing DBF file %s" % output_dbf_file_name)
 
+    def shuffle_row_for_b2b_headers(self, input_sheet_name, rows_to_process,
+                                    dwnload_val, gst_2yrm_val, xl_class):
+        def get_var_name(header_dict, val):
+            for tem_header, t_val in header_dict.items():
+                if t_val == val:
+                    return tem_header
+            return None
+
+        index_map = list()
+        rows_to_append = list()
+        b2b_headers_class = constants.headers.B2B
+        output_header = self.get_excel_header(input_sheet_name)
+
+        for b2b_header in xl_class.output_header["B2B"]:
+            b2b_header_var = get_var_name(b2b_headers_class.get_dict(),
+                                          b2b_header)
+            index = -1
+            for t_index, t_header in enumerate(
+                    xl_class.output_header[input_sheet_name]):
+                target_header_var = get_var_name(output_header.get_dict(),
+                                                 t_header)
+                if b2b_header_var == target_header_var:
+                    index = t_index
+                    break
+            index_map.append(index)
+
+        for input_row in rows_to_process:
+            row_data = list()
+            for index in index_map:
+                if index == -1:
+                    row_data.append("")
+                    continue
+                row_data.append(input_row[index])
+            row_data[xl_class.output_header["B2B"].index(
+                b2b_headers_class.DOWNLOAD)] = dwnload_val
+            row_data[xl_class.output_header["B2B"].index(
+                b2b_headers_class.GST2_YRM)] = gst_2yrm_val
+
+            d_index = xl_class.output_header["B2B"].index(
+                b2b_headers_class.INV_TYPE)
+            if input_sheet_name != "B2B" and row_data[d_index] == "":
+                row_data.pop(d_index)
+                row_data.insert(d_index, input_sheet_name)
+            if row_data[d_index].lower() == "credit note":
+                for value_header in [b2b_headers_class.INV_VALUE,
+                                     b2b_headers_class.TAXABLE,
+                                     b2b_headers_class.IGST_PAID,
+                                     b2b_headers_class.CGST_PAID,
+                                     b2b_headers_class.SGST_PAID,
+                                     b2b_headers_class.CESS_PAID]:
+                    header_index = xl_class.output_header["B2B"].index(
+                        value_header)
+                    value = row_data.pop(header_index)
+                    row_data.insert(header_index, -value)
+            rows_to_append.append(row_data)
+        return rows_to_append
+
+
+class Gstr2Parser(GstrParser):
+    def __init__(self, progress_bar, log_viewer):
+        super(Gstr2Parser, self).__init__(progress_bar, log_viewer)
+
     def extract_data_from_excel_sheet(self, input_sheet_name, input_sheet,
                                       row_num, dwnload_val, gst_2yrm_val,
                                       xl_class):
-        def get_month_abbr(month_num):
-            return ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-                    'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month_num]
         rows_to_append = list()
         num_of_blank_rows_to_break = 5
         num_blank_rows = 0
@@ -161,7 +225,7 @@ class ExcelParser:
             if t_header.INV_DATE in sheet_header:
                 cell_val = \
                     data_row[sheet_header.index(t_header.INV_DATE)].split("-")
-                cell_val.insert(1, get_month_abbr(int(cell_val.pop(1))))
+                cell_val.insert(1, self.get_month_abbr(int(cell_val.pop(1))))
                 data_row[sheet_header.index(t_header.INV_DATE)] = \
                     "-".join(cell_val)
 
@@ -191,63 +255,6 @@ class ExcelParser:
                 data_row[sheet_header.index(t_header.SUBMITTED)] = 'SUBMITTED'
                 data_row[sheet_header.index(t_header.GST3_YRM)] = 'Y'
             rows_to_append.append(data_row)
-        return rows_to_append
-
-    def shuffle_row_for_b2b_headers(self, input_sheet_name, rows_to_process,
-                                    dwnload_val, gst_2yrm_val, xl_class):
-        def get_var_name(header_dict, val):
-            for tem_header, t_val in header_dict.items():
-                if t_val == val:
-                    return tem_header
-            return None
-
-        index_map = list()
-        rows_to_append = list()
-        b2b_headers_class = constants.headers.B2B
-        output_header = self.get_excel_header(input_sheet_name)
-
-        for b2b_header in xl_class.output_header["B2B"]:
-            b2b_header_var = get_var_name(b2b_headers_class.get_dict(),
-                                          b2b_header)
-            index = -1
-            for t_index, t_header in enumerate(
-                    xl_class.output_header[input_sheet_name]):
-                target_header_var = get_var_name(output_header.get_dict(),
-                                                 t_header)
-                if b2b_header_var == target_header_var:
-                    index = t_index
-                    break
-            index_map.append(index)
-
-        for input_row in rows_to_process:
-            row_data = list()
-            for index in index_map:
-                if index == -1:
-                    row_data.append("")
-                    continue
-                row_data.append(input_row[index])
-            row_data[xl_class.output_header["B2B"].index(
-                b2b_headers_class.DOWNLOAD)] = dwnload_val
-            row_data[xl_class.output_header["B2B"].index(
-                b2b_headers_class.GST2_YRM)] = gst_2yrm_val
-
-            d_index = xl_class.output_header["B2B"].index(
-                b2b_headers_class.INV_TYPE)
-            if input_sheet_name != "B2B" and row_data[d_index] == "":
-                row_data.pop(d_index)
-                row_data.insert(d_index, input_sheet_name)
-            if row_data[d_index].lower() == "credit note":
-                for value_header in [b2b_headers_class.INV_VALUE,
-                                     b2b_headers_class.TAXABLE,
-                                     b2b_headers_class.IGST_PAID,
-                                     b2b_headers_class.CGST_PAID,
-                                     b2b_headers_class.SGST_PAID,
-                                     b2b_headers_class.CESS_PAID]:
-                    header_index = xl_class.output_header["B2B"].index(
-                        value_header)
-                    value = row_data.pop(header_index)
-                    row_data.insert(header_index, -value)
-            rows_to_append.append(row_data)
         return rows_to_append
 
     def convert(self, input_file_name):

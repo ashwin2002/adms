@@ -3,7 +3,7 @@ from collections import OrderedDict
 from constants.headers import B2B, B2BA, CDNR, CDNRA, IMPG, TDS, TCS
 
 
-class HeadersTillJun2020(object):
+class Gstr2HeadersTillJun2020(object):
     input_header = OrderedDict()
     output_header = dict()
     start_row = dict()
@@ -77,7 +77,7 @@ class HeadersTillJun2020(object):
                "SUPPNAME C(35); SUBMITTED C(11)"
 
 
-class HeadersJul2020Current(object):
+class Gstr2HeadersJul2020Current(object):
     input_header = OrderedDict()
     output_header = dict()
     start_row = dict()

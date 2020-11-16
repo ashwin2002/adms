@@ -1,16 +1,18 @@
 class Gstr(object):
-    GSTIN = "GSTIN"
     DUMMY = "dummy"
 
-
-class B2B(Gstr):
+    GSTIN = "GSTIN"
     SUPP_NAME = "SUPP_NAME"
     INV_NO = "INV_NO"
     INV_DATE = "INV_DATE"
     INV_VALUE = "INV_VALUE"
+    INV_TYPE = "INV_TYPE"
+    REASON = "Reason"
+
+
+class B2B(Gstr):
     PLACE = "Place"
     RCM = "RCM"
-    INV_TYPE = "INV_TYPE"
     RATE = "Rate"
     TAXABLE = "Taxable"
     IGST_PAID = "IGST_Paid"
@@ -54,9 +56,6 @@ class B2BA(B2B):
 
 
 class CDNR(B2BA):
-    INV_TYPE = "Note Type"
-    REASON = "Reason"
-
     @staticmethod
     def get_dict():
         d = dict()

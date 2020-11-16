@@ -1,6 +1,6 @@
 import os
 
-from data.excel import HeadersJul2020Current, HeadersTillJun2020
+from data.excel import Gstr2HeadersJul2020Current, Gstr2HeadersTillJun2020
 
 
 def is_row_blank(d_row):
@@ -33,5 +33,5 @@ def get_next_col(curr_col):
 
 def get_target_excel_class(gst_2yrm_val):
     if int(gst_2yrm_val[4:6]) < 7 and int(gst_2yrm_val[0:4]) <= 2020:
-        return HeadersTillJun2020
-    return HeadersJul2020Current
+        return Gstr2HeadersTillJun2020
+    return Gstr2HeadersJul2020Current
