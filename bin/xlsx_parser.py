@@ -83,7 +83,7 @@ class ExcelParser:
                     if cell_val == "":
                         cell_val = 0
                 elif field_spec[1][0] == "C":
-                    cell_val = cell_val[:int(field_spec[1][2:-1])]
+                    cell_val = str(cell_val)[:int(field_spec[1][2:-1])]
 
                 row_data.append(cell_val)
             if not row_data:
@@ -95,7 +95,8 @@ class ExcelParser:
         self.log.info("Done writing DBF file %s" % output_dbf_file_name)
 
     def extract_data_from_excel_sheet(self, input_sheet_name, input_sheet,
-                                      row_num, dwnload_val, gst_2yrm_val):
+                                      row_num, dwnload_val, gst_2yrm_val,
+                                      xl_class):
         def get_month_abbr(month_num):
             return ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
                     'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month_num]
@@ -103,7 +104,6 @@ class ExcelParser:
         num_of_blank_rows_to_break = 5
         num_blank_rows = 0
 
-        xl_class = get_target_excel_class(gst_2yrm_val)
         sheet_header = xl_class.output_header[input_sheet_name]
         input_header = xl_class.input_header[input_sheet_name]
 
@@ -194,7 +194,7 @@ class ExcelParser:
         return rows_to_append
 
     def shuffle_row_for_b2b_headers(self, input_sheet_name, rows_to_process,
-                                    dwnload_val, gst_2yrm_val):
+                                    dwnload_val, gst_2yrm_val, xl_class):
         def get_var_name(header_dict, val):
             for tem_header, t_val in header_dict.items():
                 if t_val == val:
@@ -206,7 +206,6 @@ class ExcelParser:
         b2b_headers_class = constants.headers.B2B
         output_header = self.get_excel_header(input_sheet_name)
 
-        xl_class = get_target_excel_class(gst_2yrm_val)
         for b2b_header in xl_class.output_header["B2B"]:
             b2b_header_var = get_var_name(b2b_headers_class.get_dict(),
                                           b2b_header)
@@ -298,7 +297,7 @@ class ExcelParser:
                 rows_to_append = self.extract_data_from_excel_sheet(
                     input_sheet_name, input_sheet,
                     xl_class.start_row[input_sheet_name],
-                    dwnload_val, gst_2yrm_val)
+                    dwnload_val, gst_2yrm_val, xl_class)
 
                 # Create and append data to output sheet
                 output_sheet = output_workbook.create_sheet(input_sheet_name)
@@ -313,7 +312,8 @@ class ExcelParser:
                         input_sheet_name,
                         rows_to_append,
                         dwnload_val,
-                        gst_2yrm_val)
+                        gst_2yrm_val,
+                        xl_class)
                     output_sheet = output_workbook["B2B"]
 
                     for row in rows_to_append:
