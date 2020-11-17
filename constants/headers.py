@@ -2,11 +2,11 @@ class Gstr(object):
     DUMMY = "dummy"
 
     GSTIN = "GSTIN"
-    SUPP_NAME = "SUPP_NAME"
-    INV_NO = "INV_NO"
-    INV_DATE = "INV_DATE"
-    INV_VALUE = "INV_VALUE"
-    INV_TYPE = "INV_TYPE"
+    SUPP_NAME = "SuppName"
+    INV_NO = "INVNo"
+    INV_DATE = "INVDate"
+    INV_VALUE = "INVValue"
+    INV_TYPE = "INVType"
     REASON = "Reason"
 
 
@@ -15,27 +15,27 @@ class B2B(Gstr):
     RCM = "RCM"
     RATE = "Rate"
     TAXABLE = "Taxable"
-    IGST_PAID = "IGST_Paid"
-    CGST_PAID = "CGST_Paid"
-    SGST_PAID = "SGST_Paid"
-    CESS_PAID = "CESS_Paid"
+    IGST_PAID = "IGSTPaid"
+    CGST_PAID = "CGSTPaid"
+    SGST_PAID = "SGSTPaid"
+    CESS_PAID = "CESSPaid"
     ELIGIBLE = "Eligible"
-    IGST_AVAILED = "IGST_AVAILD"
-    CGST_AVAILED = "CGST_AVAILD"
-    SGST_AVAILED = "SGST_AVAILD"
-    CESS_AVAILED = "CESS_AVAILD"
+    IGST_AVAILED = "IGSTAVAILD"
+    CGST_AVAILED = "CGSTAVAILD"
+    SGST_AVAILED = "SGSTAVAILD"
+    CESS_AVAILED = "CESSAVAILD"
     DOWNLOAD = "DWNLOAD"
     GST2_YRM = "GST2YRM"
     SUBMITTED = "Submitted"
-    GSTR1_FILED_DATE = "GSTR1_FILED_DATE"
+    GSTR1_FILED_DATE = "GSTR1FiledDate"
     GST1_YRM = "GST1YRM"
     GST3_YRM = "GST3YRM"
     AMENDMENT = "Amendment"
-    TAX_PERIOD = "TAX_PERIOD"
-    EFFECTIVE_CANCELLATION_DATE = "EFF_CANCEL_DATE"
-    PORT_CODE = "PORT_CODE"
-    TCS_NET = "TCS_NET"
-    APPLICABLE_TAX_RATE = "APPLICABLE_TAX_RATE"
+    TAX_PERIOD = "TaxPeriod"
+    EFFECTIVE_CANCELLATION_DATE = "EffCancelDate"
+    PORT_CODE = "PortCode"
+    TCS_NET = "TcsNet"
+    APPLICABLE_TAX_RATE = "ApplicableTaxRate"
 
     @staticmethod
     def get_dict():
@@ -46,7 +46,7 @@ class B2B(Gstr):
 
 
 class B2BA(B2B):
-    DOWNLOAD_DATE = "Download_date"
+    DOWNLOAD_DATE = "DownloadDate"
 
     @staticmethod
     def get_dict():
