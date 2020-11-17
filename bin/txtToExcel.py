@@ -30,7 +30,7 @@ class TextToExcel:
                                    commonLib.getMonthStr(month_num, 3),
                                    yr_num)
 
-            if is_file_exists(output_file_name):
+            if not is_file_exists(output_file_name):
                 workbook = openpyxl.Workbook()
                 workbook.guess_types = True
                 worksheet = workbook.create_sheet(data_type_str)
