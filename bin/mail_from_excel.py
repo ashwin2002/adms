@@ -1,3 +1,5 @@
+import os
+
 import openpyxl
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -44,7 +46,7 @@ class MailFromExcel:
 
         self.log.info("Processing file %s" % input_file_name)
         input_workbook = openpyxl.load_workbook(input_file_name)
-        file_name = input_file_name.split('\\')[-1].split('.')[0].split('_')
+        file_name = os.path.basename(input_file_name).split('.')[0].split('_')
         comp_initial = file_name[0]
         company_file_data = "%s %s - " % (comp_initial, file_name[1])
 
