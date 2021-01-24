@@ -54,8 +54,8 @@ class MailFromExcel:
         with open("data/company.yaml", "r") as fp:
             company = yaml.load(fp, Loader=yaml.FullLoader)["company"]
 
-        if comp_initial not in company.info \
-                or company.info[comp_initial]["mail"] == "":
+        if comp_initial not in company \
+                or company[comp_initial]["mail"] == "":
             self.log.error("Exiting: Mail id not defined for '%s'"
                            % comp_initial)
             return
@@ -140,8 +140,8 @@ class MailFromExcel:
                     self.log.info("Login successful")
 
                 comp_name = \
-                    company.info[comp_initial]["name"] \
-                    + " GST # %s" % company.info[comp_initial]["gst"]
+                    company[comp_initial]["name"] \
+                    + " GST # %s" % company[comp_initial]["gst"]
                 curr_html_header = \
                     mail_info["html_header"] % (m_data["heading"] % comp_name,
                                                 m_data["message"])
@@ -157,7 +157,7 @@ class MailFromExcel:
                     self.log.info("Sending mail for %s..." % supp_name)
                     msg = MIMEMultipart('alternative')
                     msg['From'] = Smtp.user_name
-                    msg['To'] = company.info[comp_initial]["mail"]
+                    msg['To'] = company[comp_initial]["mail"]
                     msg['Subject'] = "%s %s::%s - %s" \
                                      % (company_file_data,
                                         supp_name,
@@ -187,7 +187,7 @@ class MailFromExcel:
                     # msg.attach(data_to_attach)
                     smtp_session.sendmail(
                         Smtp.user_name,
-                        company.info[comp_initial]["mail"],
+                        company[comp_initial]["mail"],
                         msg.as_string())
                     mail_count += 1
 
