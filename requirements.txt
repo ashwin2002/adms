@@ -1,3 +1,4 @@
 openpyxl
 PyQt5
 dbf==0.99
+pyyaml

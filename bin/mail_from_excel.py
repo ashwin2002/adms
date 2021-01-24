@@ -5,7 +5,8 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from data import company
+import yaml
+
 from data.inputs_mail import mail_info
 from data.mail import Smtp
 from lib.excel_lib import is_file_exists, is_row_blank
@@ -49,6 +50,9 @@ class MailFromExcel:
         file_name = os.path.basename(input_file_name).split('.')[0].split('_')
         comp_initial = file_name[0]
         company_file_data = "%s %s - " % (comp_initial, file_name[1])
+
+        with open("data/company.yaml", "r") as fp:
+            company = yaml.load(fp, Loader=yaml.FullLoader)["company"]
 
         if comp_initial not in company.info \
                 or company.info[comp_initial]["mail"] == "":
