@@ -1,7 +1,13 @@
 import json
 import re
+from datetime import datetime
 
 from constants.common import month_arr, state_list
+
+
+def get_curr_date(date_format):
+    curr_date = datetime.now()
+    return curr_date.strftime(date_format)
 
 
 def verifyGstinNo(gstin):

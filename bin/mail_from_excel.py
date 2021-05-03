@@ -54,8 +54,7 @@ class MailFromExcel:
         with open("data/company.yaml", "r") as fp:
             company = yaml.load(fp, Loader=yaml.FullLoader)["company"]
 
-        if comp_initial not in company \
-                or company[comp_initial]["mail"] == "":
+        if comp_initial not in company or company[comp_initial]["mail"] == "":
             self.log.error("Exiting: Mail id not defined for '%s'"
                            % comp_initial)
             return

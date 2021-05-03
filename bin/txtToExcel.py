@@ -2,6 +2,7 @@ import openpyxl
 import traceback
 
 from lib import commonLib
+from lib.commonLib import get_curr_date
 from lib.excel_lib import is_file_exists
 from lib.logging import UiLogger
 
@@ -29,6 +30,10 @@ class TextToExcel:
                                 % (comp_str,
                                    commonLib.getMonthStr(month_num, 3),
                                    yr_num)
+
+            # Append processing date only for 'PR' worksheet
+            if data_type_str == "PR":
+                data_type_str += "_" + get_curr_date("%d%b%y")
 
             if not is_file_exists(output_file_name):
                 workbook = openpyxl.Workbook()
